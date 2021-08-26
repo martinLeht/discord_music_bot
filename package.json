@@ -10,6 +10,8 @@
     "prestart": "npm run build",
     "start": "cross-env NODE_ENV=production node dist/server.js",
     "dev": "npx ts-node src/server.ts",
+    "postinstall": "npm run tsc",
+    "tsc": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Martin Lehtomaa",
