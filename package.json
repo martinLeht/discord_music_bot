@@ -32,5 +32,8 @@
     "typescript": "^4.3.5",
     "ytdl-core": "^4.9.1",
     "ytsr": "^3.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "^16.7.2"
   }
 }
