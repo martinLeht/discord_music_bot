@@ -4,14 +4,13 @@
   "description": "Music bot for discord (because Groovy support is stopped...)",
   "main": "dist/server.js",
   "scripts": {
-    "build": "rimraf dist && npm run tsc && tsc",
+    "build": "rimraf dist && tsc",
     "preserve": "npm run build",
     "serve": "cross-env NODE_ENV=development concurrently \"tsc --watch\" \"nodemon -q dist/server.js\"",
     "prestart": "npm run build",
-    "start": "npm run tsc && cross-env NODE_ENV=production node dist/server.js",
+    "heroku-postbuild": "npm run build",
+    "start": "cross-env NODE_ENV=production node dist/server.js",
     "dev": "npx ts-node src/server.ts",
-    "postinstall": "npm run tsc",
-    "tsc": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Martin Lehtomaa",
