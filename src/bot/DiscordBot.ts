@@ -72,7 +72,7 @@ export class DiscordBot {
         this.client.on('error', (err: Error) => {
             console.log(err);
         });
-
+        
         return this.client.login(this.token);
     }
 
