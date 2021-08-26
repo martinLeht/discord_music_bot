@@ -1,0 +1,34 @@
+{
+  "name": "discord_music_bot",
+  "version": "1.0.0",
+  "description": "Music bot for discord (because Groovy support is stopped...)",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "preserve": "npm run build",
+    "serve": "cross-env NODE_ENV=development concurrently \"tsc --watch\" \"nodemon -q dist/server.js\"",
+    "prestart": "npm run build",
+    "start": "cross-env NODE_ENV=production node dist/server.js",
+    "dev": "npx ts-node src/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Martin Lehtomaa",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/opus": "^0.5.3",
+    "cross-env": "^7.0.3",
+    "discord.js": "^12.5.3",
+    "dotenv": "^10.0.0",
+    "ffmpeg": "^0.0.4",
+    "ffmpeg-static": "^4.4.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "helmet": "^4.6.0",
+    "inversify": "^5.1.1",
+    "nodemon": "^2.0.12",
+    "reflect-metadata": "^0.1.13",
+    "rimraf": "^3.0.2",
+    "ts-node": "^10.2.1",
+    "ytdl-core": "^4.9.1",
+    "ytsr": "^3.5.3"
+  }
+}
