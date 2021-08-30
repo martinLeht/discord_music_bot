@@ -1,4 +1,5 @@
 import { ICommand } from "./ICommand";
+import { InfoCommand } from "./info/InfoCommand";
 import { PlayCommand } from "./play/PlayCommand";
 import { SkipCommand } from "./skip/SkipCommand";
 import { StopCommand } from "./stop/StopCommand";
@@ -8,7 +9,8 @@ import { StopCommand } from "./stop/StopCommand";
 const commands: ICommand[] = [
     new PlayCommand(),
     new SkipCommand(),
-    new StopCommand()
+    new StopCommand(),
+    new InfoCommand()
 ];
 
 export {
