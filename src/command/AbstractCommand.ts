@@ -10,7 +10,7 @@ export abstract class AbstractCommand implements ICommand {
 
     public isMemberInVoiceChannel(message: Message): boolean {
         const voiceChannel = message.member?.voice.channel;
-        return !voiceChannel;
+        return voiceChannel !== undefined && voiceChannel !== null;
     }
 
     public hasPermissions(message: Message, voiceChannel: VoiceChannel): boolean {
