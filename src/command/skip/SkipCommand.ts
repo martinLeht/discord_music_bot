@@ -7,8 +7,8 @@ export class SkipCommand extends AbstractCommand {
 
     public readonly name: Command = Command.skip;
 
-    public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
-        if (!message.member?.voice.channel) {
+    public async execute(message: Message, _args: string[], queue: Map<string, IQueue>): Promise<any> {
+        if (!this.isMemberInVoiceChannel(message)) {
             return message.channel.send(
                 "You have to be in a voice channel to skip a song!"
             );

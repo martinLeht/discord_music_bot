@@ -8,8 +8,8 @@ export class StopCommand extends AbstractCommand implements ICommand {
 
     public readonly name: Command = Command.stop;
 
-    public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
-        if (!message.member?.voice.channel) {
+    public async execute(message: Message, _args: string[], queue: Map<string, IQueue>): Promise<any> {
+        if (this.isMemberInVoiceChannel(message)) {
             return message.channel.send(
                 "You have to be in a voice channel to stop the music!"
             );

@@ -33,8 +33,6 @@ export class DiscordBot {
         this.client.on('message', async (message: Message) => {
             if (message.content.startsWith('!join') && message.member?.voice.channel) {
                 message.member.voice.channel.join();
-            } else if (message.content.startsWith('!leave') && message.member?.voice.channel) {
-                message.member.voice.channel.leave();
             } else {
                 if (!message.content.startsWith(PREFIX) || message.author.bot) return;
 

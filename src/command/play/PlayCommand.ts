@@ -21,7 +21,11 @@ export class PlayCommand extends AbstractCommand {
             );
         }
 
-        await this.checkPermissions(message, voiceChannel);
+        if (!this.hasPermissions(message, voiceChannel)) {
+            return message.channel.send(
+                "I need the permissions to join and speak in your voice channel! These are the terms if you need me as a private DJ..."
+            );
+        }
 
         if (!args) {
             return message.channel.send(

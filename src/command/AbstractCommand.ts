@@ -8,14 +8,18 @@ export abstract class AbstractCommand implements ICommand {
     
     public abstract execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any>;
 
-    public async checkPermissions(message: Message, voiceChannel: VoiceChannel): Promise<any> {
-        if (!message.client.user) return;
+    public isMemberInVoiceChannel(message: Message): boolean {
+        const voiceChannel = message.member?.voice.channel;
+        return !voiceChannel;
+    }
+
+    public hasPermissions(message: Message, voiceChannel: VoiceChannel): boolean {
+        if (!message.client.user) return false;
         const permissions = voiceChannel.permissionsFor(message.client.user);
 
         if (!permissions?.has("CONNECT") || !permissions.has("SPEAK")) {
-            return message.channel.send(
-                "I need the permissions to join and speak in your voice channel!"
-            );
+            return false;
         }
+        return true;
     }
 }
