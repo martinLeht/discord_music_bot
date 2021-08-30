@@ -1,5 +1,6 @@
 export enum Command {
     play,
     skip,
-    stop
+    stop,
+    info
 }
