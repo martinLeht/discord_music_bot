@@ -22,8 +22,8 @@ export class InfoCommand extends AbstractCommand {
             .setColor('#0099ff')
             .setAuthor('Dj Nippon by Nippon Squad', 'https://wallpaperaccess.com/full/2840971.jpg', 'https://steamcommunity.com/groups/nipponsquad')
             .setThumbnail('https://wallpaperaccess.com/full/2840971.jpg')
-            .setDescription('A simple music player that can be used through chat with command prefix \"!\" before command (examples below).\n' 
-                + 'Play music by song name or youtube URL. Add songs to queue and skip songs or stop music playing completely.\n'
+            .setDescription('A simple music player that can be used through chat with command prefix \"!\" before command (examples below).\n\n' 
+                + 'Play music by song name or youtube URL and add them to queue. Control the playing music by skipping songs or stopping music completely.\n\n'
                 + 'Commands:')
             .addFields(
                 { name: 'Play music:', value: '!play <song name> OR <url>', inline: true },
