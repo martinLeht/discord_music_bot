@@ -103,11 +103,15 @@ export class PlayCommand extends AbstractCommand {
         }
         const dispatcher = serverQueue.connection
             .play(ytdl(song.url))
-            .on("finish", () => {
+            .on('finish', () => {
                 serverQueue.songs.shift();
                 this.play(guild, serverQueue.songs[0], queue);
             })
-            .on("error", (error: Error) => console.error(error));
+            .on('info', (video) => {
+                console.log(video.videoInfo);
+                console.log(video.videoFormat);
+            })
+            .on('error', (error: Error) => console.error(error));
 
         dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
