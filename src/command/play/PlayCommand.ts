@@ -84,8 +84,8 @@ export class PlayCommand extends AbstractCommand {
         } else {
             const searchKeywords = args.join(" ");
             const songInfo = await ytsr(searchKeywords, { pages: 1 });
-            console.log(songInfo);
-            console.log(songInfo[0]);
+            const info = await ytdl.getInfo(songInfo.items[0].url);
+            console.log(info);
             song = {
                 title: songInfo.items[0].title,
                 url: songInfo.items[0].url
