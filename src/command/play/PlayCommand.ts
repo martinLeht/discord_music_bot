@@ -76,6 +76,7 @@ export class PlayCommand extends AbstractCommand {
         let song: ISong | null = null;
         if (args[0].includes("www.youtube.com/watch?")) {
             const songInfo = await ytdl.getInfo(args[0]);
+            console.log(songInfo);
             song = {
                 title: songInfo.videoDetails.title,
                 url: songInfo.videoDetails.video_url
@@ -83,6 +84,7 @@ export class PlayCommand extends AbstractCommand {
         } else {
             const searchKeywords = args.join(" ");
             const songInfo = await ytsr(searchKeywords, { pages: 1 });
+            console.log(songInfo[0]);
             song = {
                 title: songInfo.items[0].title,
                 url: songInfo.items[0].url
@@ -106,10 +108,6 @@ export class PlayCommand extends AbstractCommand {
             .on('finish', () => {
                 serverQueue.songs.shift();
                 this.play(guild, serverQueue.songs[0], queue);
-            })
-            .on('info', (video) => {
-                console.log(video.videoInfo);
-                console.log(video.videoFormat);
             })
             .on('error', (error: Error) => console.error(error));
 
