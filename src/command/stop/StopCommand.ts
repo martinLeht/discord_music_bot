@@ -23,6 +23,12 @@ export class StopCommand extends AbstractCommand implements ICommand {
             return message.channel.send("There is no song that I could stop!");
         }
 
+        if (!serverQueue.connection || !serverQueue.connection.dispatcher) {
+            serverQueue.voiceChannel.leave();
+            queue.delete(guild.id);
+            return message.channel.send("Something went wrong on song dispatching...");
+        }
+
         serverQueue.songs = [];
         serverQueue.connection.dispatcher.end();
     }

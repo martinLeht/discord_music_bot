@@ -22,6 +22,12 @@ export class SkipCommand extends AbstractCommand {
         if (!serverQueue) {
             return message.channel.send("There is no song that I could skip!");
         }
+
+        if (!serverQueue.connection || !serverQueue.connection.dispatcher) {
+            serverQueue.voiceChannel.leave();
+            queue.delete(guild.id);
+            return message.channel.send("Something went wrong on song dispatching...");
+        }
         serverQueue.connection.dispatcher.end();
     }
         

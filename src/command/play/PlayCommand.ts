@@ -99,11 +99,12 @@ export class PlayCommand extends AbstractCommand {
 
         if (!serverQueue) return;
 
-        if (!song) {
+        if (!serverQueue.connection || !song) {
             serverQueue.voiceChannel.leave();
             queue.delete(guild.id);
             return;
         }
+        
         const dispatcher = serverQueue.connection
             .play(ytdl(song.url))
             .on('finish', () => {
