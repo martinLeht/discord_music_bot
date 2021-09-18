@@ -114,6 +114,7 @@ export class PlayCommand extends AbstractCommand {
         return song;
     }
 
+    /*
     private handlePlayOpts(opts: IOption[]): any {
         let playOpts = {};
         for (const opt of opts) {
@@ -128,7 +129,7 @@ export class PlayCommand extends AbstractCommand {
         }
         return playOpts;
     }
-
+*/
     private play(guild: Guild, song: ISong, queue: Map<string, IQueue>): void {
         const serverQueue = queue.get(guild.id);
 
@@ -141,10 +142,10 @@ export class PlayCommand extends AbstractCommand {
         }
         let playOpts;
         if (song.opts !== undefined && song.opts.length > 0) {
-            playOpts = this.handlePlayOpts(song.opts);
+            //playOpts = this.handlePlayOpts(song.opts);
         }
         const dispatcher = serverQueue.connection
-            .play(ytdl(song.url, { begin: '51s' }))
+            .play(ytdl(song.url, { begin: '1m11s' }))
             .on('finish', () => {
                 serverQueue.songs.shift();
                 this.play(guild, serverQueue.songs[0], queue);
