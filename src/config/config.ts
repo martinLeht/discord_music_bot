@@ -13,3 +13,4 @@ if (process.env.NODE_ENV === 'development') {
 export const PORT = process.env.PORT;
 export const TOKEN = process.env.TOKEN ? process.env.TOKEN : "";
 export const PREFIX = process.env.CMD_PREFIX ? process.env.CMD_PREFIX : "!" ;
+export const OPT_PREFIX = process.env.OPT_PREFIX ? process.env.OPT_PREFIX : "-" ;

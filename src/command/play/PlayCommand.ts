@@ -4,6 +4,9 @@ import { Command } from "../Command";
 import { AbstractCommand } from "../AbstractCommand";
 import { ISong } from "../../song/ISong";
 import { IQueue } from "../../song/IQueue";
+import { Option } from '../Option';
+import { OPT_PREFIX } from "../../config/config";
+import { IOption } from "../IOption";
 
 const ytsr = require('ytsr');
 
@@ -11,6 +14,10 @@ const ytsr = require('ytsr');
 export class PlayCommand extends AbstractCommand {
 
     public readonly name: Command = Command.play;
+
+    public readonly options: Option[] = [
+        Option.startAt
+    ];
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
         
@@ -32,7 +39,7 @@ export class PlayCommand extends AbstractCommand {
                 "You need provide arguments (url or vide title) to play!"
             );
         }
-        const song: ISong | null = await this.fetchSong(args);
+        const song: ISong | null = await this.fetchSong(message, args);
 
         if(!message.guild || !song) return;
 
@@ -72,11 +79,15 @@ export class PlayCommand extends AbstractCommand {
 
     }
 
-    private async fetchSong(args: string[]): Promise<ISong | null> {
+    private async fetchSong(message: Message, args: string[]): Promise<ISong | null> {
         let song: ISong | null = null;
+
+        // Extract options from arguments
+        const opts: IOption[] = this.getOptions(message, args);
+        args = args.filter(arg => !this.isOptionArg(arg));
+
         if (args[0].includes("www.youtube.com/watch?")) {
             const songInfo = await ytdl.getInfo(args[0]);
-            console.log(songInfo);
             song = {
                 title: songInfo.videoDetails.title,
                 url: songInfo.videoDetails.video_url
@@ -84,14 +95,37 @@ export class PlayCommand extends AbstractCommand {
         } else {
             const searchKeywords = args.join(" ");
             const songInfo = await ytsr(searchKeywords, { pages: 1 });
+            /* Debug purposes
             const info = await ytdl.getInfo(songInfo.items[0].url);
             console.log(info);
+            */
             song = {
                 title: songInfo.items[0].title,
                 url: songInfo.items[0].url
             };
         }
+        
+        if (opts.length > 0) {
+            song.url = this.handleOpts(message, opts, song.url);
+        }
+
         return song;
+    }
+
+    private handleOpts(message: Message, opts: IOption[], url: string): string {
+        for (const opt of opts) {
+            switch(opt.name) {
+                case Option.startAt:
+                    if (opt.value !== undefined) {
+                        url += `&t=${parseInt(opt.value)}s`;
+                    }
+                    break;
+
+                default: 
+                    break; 
+            }
+        }
+        return url;
     }
 
     private play(guild: Guild, song: ISong, queue: Map<string, IQueue>): void {

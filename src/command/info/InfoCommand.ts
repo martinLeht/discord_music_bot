@@ -26,10 +26,29 @@ export class InfoCommand extends AbstractCommand {
                 + 'Play music by song name or youtube URL and add them to queue. Control the playing music by skipping songs or stopping music completely.\n\n'
                 + 'Commands:')
             .addFields(
-                { name: 'Play music:', value: '!play <song name> OR <url>', inline: true },
-                { name: 'Skip song:', value: '!skip', inline: true },
-                { name: 'Stop music:', value: '!stop', inline: true },
-                { name: 'Info:', value: '!info', inline: true },
+                { 
+                    name: 'Play music:', 
+                    value: '!play <song name> OR <url>\n'
+                            + '**Options:**\n'
+                            + '-startAt=< number in seconds >\n'
+                            + 'E.g.: **-startAt=25**', 
+                    inline: true 
+                },
+                { 
+                    name: 'Skip song:', 
+                    value: '!skip', 
+                    inline: true 
+                },
+                { 
+                    name: 'Stop music:', 
+                    value: '!stop', 
+                    inline: true 
+                },
+                { 
+                    name: 'Info:', 
+                    value: '!info', 
+                    inline: true 
+                },
             );
 
         return infoMessage;
