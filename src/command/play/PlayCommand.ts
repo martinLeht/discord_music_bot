@@ -140,12 +140,8 @@ export class PlayCommand extends AbstractCommand {
             queue.delete(guild.id);
             return;
         }
-        let playOpts;
-        if (song.opts !== undefined && song.opts.length > 0) {
-            //playOpts = this.handlePlayOpts(song.opts);
-        }
         const dispatcher = serverQueue.connection
-            .play(ytdl(song.url, { begin: '1m11s' }))
+            .play(ytdl(song.url)
             .on('finish', () => {
                 serverQueue.songs.shift();
                 this.play(guild, serverQueue.songs[0], queue);
