@@ -114,14 +114,12 @@ export class PlayCommand extends AbstractCommand {
         return song;
     }
 
-    private handlePlayOpts(opts: IOption[]): any[] {
-        const playOpts = [];
+    private handlePlayOpts(opts: IOption[]): any {
+        let playOpts = {};
         for (const opt of opts) {
             switch(opt.name) {
                 case Option.startAt:
-                    playOpts.push({
-                        begin: opt.value + 's'
-                    });
+                    playOpts.begin = opt.value + 's';
                     break;
 
                 default: 
