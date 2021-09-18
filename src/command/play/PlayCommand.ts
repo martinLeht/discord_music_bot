@@ -39,6 +39,7 @@ export class PlayCommand extends AbstractCommand {
                 "You need provide arguments (url or vide title) to play!"
             );
         }
+        
         const song: ISong | null = await this.fetchSong(message, args);
 
         if(!message.guild || !song) return;
@@ -62,6 +63,7 @@ export class PlayCommand extends AbstractCommand {
                 if (!song) return;
                 queueContract.songs.push(song);
                 queue.set(guild.id, queueContract);
+
 
                 // Calling the play function to start a song
                 this.play(guild, queueContract.songs[0], queue);
@@ -106,26 +108,27 @@ export class PlayCommand extends AbstractCommand {
         }
         
         if (opts.length > 0) {
-            song.url = this.handleOpts(message, opts, song.url);
+            song.opts = opts;
         }
 
         return song;
     }
 
-    private handleOpts(message: Message, opts: IOption[], url: string): string {
+    private handlePlayOpts(opts: IOption[]): any[] {
+        const playOpts = [];
         for (const opt of opts) {
             switch(opt.name) {
                 case Option.startAt:
-                    if (opt.value !== undefined) {
-                        url += `&t=${parseInt(opt.value)}s`;
-                    }
+                    playOpts.push({
+                        begin: opt.value + 's'
+                    });
                     break;
 
                 default: 
                     break; 
             }
         }
-        return url;
+        return playOpts;
     }
 
     private play(guild: Guild, song: ISong, queue: Map<string, IQueue>): void {
@@ -138,9 +141,12 @@ export class PlayCommand extends AbstractCommand {
             queue.delete(guild.id);
             return;
         }
-        
+        let playOpts;
+        if (song.opts !== undefined && song.opts.length > 0) {
+            playOpts = this.handlePlayOpts(song.opts);
+        }
         const dispatcher = serverQueue.connection
-            .play(ytdl(song.url))
+            .play(ytdl(song.url, !playOpts ? playOpts : undefined))
             .on('finish', () => {
                 serverQueue.songs.shift();
                 this.play(guild, serverQueue.songs[0], queue);

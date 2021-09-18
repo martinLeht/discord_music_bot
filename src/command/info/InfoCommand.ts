@@ -29,7 +29,7 @@ export class InfoCommand extends AbstractCommand {
                 { 
                     name: 'Play music:', 
                     value: '!play <song name> OR <url>\n'
-                            + '**Options:**\n'
+                            + 'Play Options:\n'
                             + '-startAt=< number in seconds >\n'
                             + 'E.g.: **-startAt=25**', 
                     inline: true 
