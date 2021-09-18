@@ -146,7 +146,7 @@ export class PlayCommand extends AbstractCommand {
             playOpts = this.handlePlayOpts(song.opts);
         }
         const dispatcher = serverQueue.connection
-            .play(ytdl(song.url, !playOpts ? playOpts : undefined))
+            .play(ytdl(song.url, { begin: '51s' }))
             .on('finish', () => {
                 serverQueue.songs.shift();
                 this.play(guild, serverQueue.songs[0], queue);
