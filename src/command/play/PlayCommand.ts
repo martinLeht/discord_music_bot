@@ -20,9 +20,7 @@ export class PlayCommand extends AbstractCommand {
     ];
 
     private ytdlDownloadConfig: any = {
-        filter: "audioonly",
-        opusEncoded: true,
-        encoderArgs: ['-af', 'bass=g=10,dynaudnorm=f=200']
+        filter: "audioonly"
     };
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
@@ -154,9 +152,9 @@ export class PlayCommand extends AbstractCommand {
                 serverQueue.voiceChannel.leave();
                 queue.delete(guild.id);
                 return;
-        });
+            });
 
-        const dispatcher = serverQueue.connection.play(audioStream, { type: 'opus' });
+        const dispatcher = serverQueue.connection.play(audioStream);
 
         dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
