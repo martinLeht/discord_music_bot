@@ -146,16 +146,17 @@ export class PlayCommand extends AbstractCommand {
             queue.delete(guild.id);
             return;
         }
-        const dispatcher = serverQueue.connection.play(
-            ytdl(song.url, this.ytdlDownloadConfig)
-                .on('finish', () => this.songFinishHandler(guild, serverQueue, queue))
-                .on('error', (error: Error) => {
-                    console.error(error);
-                    serverQueue.voiceChannel.leave();
-                    queue.delete(guild.id);
-                    return;
-                })
-        );
+
+        let audioStream = ytdl(song.url, this.ytdlDownloadConfig)
+            .on('finish', () => this.songFinishHandler(guild, serverQueue, queue))
+            .on('error', (error: Error) => {
+                console.error(error);
+                serverQueue.voiceChannel.leave();
+                queue.delete(guild.id);
+                return;
+        });
+
+        const dispatcher = serverQueue.connection.play(audioStream, { type: 'opus' });
 
         dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
