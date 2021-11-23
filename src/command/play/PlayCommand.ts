@@ -1,4 +1,4 @@
-import ytdl from "discord-ytdl-core";
+import ytdl from "ytdl-core";
 import { Guild, Message } from "discord.js";
 import { Command } from "../Command";
 import { AbstractCommand } from "../AbstractCommand";
