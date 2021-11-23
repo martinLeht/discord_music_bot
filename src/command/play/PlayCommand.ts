@@ -20,8 +20,9 @@ export class PlayCommand extends AbstractCommand {
     ];
 
     private ytdlDownloadConfig: any = {
-        filter: 'audioonly',
-        fmt: 'mp3'
+        filter: "audioonly",
+        opusEncoded: true,
+        encoderArgs: ['-af', 'bass=g=10,dynaudnorm=f=200']
     };
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
