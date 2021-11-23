@@ -19,6 +19,7 @@
     "@discordjs/opus": "^0.5.3",
     "@types/node": "^16.7.2",
     "cross-env": "^7.0.3",
+    "discord-ytdl-core": "^5.0.4",
     "discord.js": "^12.5.3",
     "dotenv": "^10.0.0",
     "ffmpeg": "^0.0.4",

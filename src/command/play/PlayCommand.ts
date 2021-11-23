@@ -1,4 +1,4 @@
-import ytdl from "ytdl-core";
+import ytdl from "discord-ytdl-core";
 import { Guild, Message } from "discord.js";
 import { Command } from "../Command";
 import { AbstractCommand } from "../AbstractCommand";
@@ -18,6 +18,11 @@ export class PlayCommand extends AbstractCommand {
     public readonly options: Option[] = [
         Option.startAt
     ];
+
+    private ytdlDownloadConfig: any = {
+        filter: 'audioonly',
+        fmt: 'mp3'
+    };
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
         
@@ -140,15 +145,23 @@ export class PlayCommand extends AbstractCommand {
             queue.delete(guild.id);
             return;
         }
-        const dispatcher = serverQueue.connection
-            .play(ytdl(song.url)
-            .on('finish', () => {
-                serverQueue.songs.shift();
-                this.play(guild, serverQueue.songs[0], queue);
-            })
-            .on('error', (error: Error) => console.error(error));
+        const dispatcher = serverQueue.connection.play(
+            ytdl(song.url, this.ytdlDownloadConfig)
+                .on('finish', () => this.songFinishHandler(guild, serverQueue, queue))
+                .on('error', (error: Error) => {
+                    console.error(error);
+                    serverQueue.voiceChannel.leave();
+                    queue.delete(guild.id);
+                    return;
+                })
+        );
 
         dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
+    }
+
+    private songFinishHandler(guild: Guild, serverQueue: IQueue, queue: Map<string, IQueue>): void {
+        serverQueue.songs.shift();
+        this.play(guild, serverQueue.songs[0], queue);
     }
 }
