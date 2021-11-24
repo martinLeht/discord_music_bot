@@ -152,7 +152,7 @@ export class PlayCommand extends AbstractCommand {
             return;
         }
 
-        let audioStream = await ytdl(song.url);
+        let audioStream = await ytdl(song.url, { quality: 'highestaudio', filter: 'audioonly' });
         console.log(audioStream);
         const dispatcher = serverQueue.connection.play(audioStream, {
             type: "opus"
