@@ -1,4 +1,4 @@
-import ytdl from "ytdl-core";
+import ytdl from "discord-ytdl-core";
 import { Guild, Message } from "discord.js";
 import { Command } from "../Command";
 import { AbstractCommand } from "../AbstractCommand";
@@ -20,7 +20,9 @@ export class PlayCommand extends AbstractCommand {
     ];
 
     private ytdlDownloadConfig: any = {
-        filter: "audioonly"
+        filter: "audioonly",
+        opusEncoded: true,
+        encoderArgs: ['-af', 'bass=g=10,dynaudnorm=f=200']
     };
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
@@ -153,8 +155,10 @@ export class PlayCommand extends AbstractCommand {
                 queue.delete(guild.id);
                 return;
             });
-
-        const dispatcher = serverQueue.connection.play(audioStream);
+        console.log(audioStream);
+        const dispatcher = serverQueue.connection.play(audioStream, {
+            type: "opus"
+        });
 
         dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
