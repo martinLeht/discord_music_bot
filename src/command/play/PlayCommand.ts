@@ -1,4 +1,4 @@
-import ytdl from "discord-ytdl-core";
+import ytdl from "ytdl-core-discord";
 import { Guild, Message } from "discord.js";
 import { Command } from "../Command";
 import { AbstractCommand } from "../AbstractCommand";
@@ -21,9 +21,13 @@ export class PlayCommand extends AbstractCommand {
 
     private ytdlDownloadConfig: any = {
         filter: "audioonly",
-        opusEncoded: false,
-        fmt: "mp3",
-        encoderArgs: ['-af', 'bass=g=10,dynaudnorm=f=200']
+        opusEncoded: true,
+        encoderArgs: ['-af','dynaudnorm=f=200'],
+        bitrate: 320,
+        quality: "highestaudio",
+        liveBuffer: 40000,
+        highWaterMark: 1 << 25, 
+
     };
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
@@ -73,7 +77,7 @@ export class PlayCommand extends AbstractCommand {
 
 
                 // Calling the play function to start a song
-                this.play(guild, queueContract.songs[0], queue);
+                await this.play(guild, queueContract.songs[0], queue);
             } catch (err) {
                 // Printing the error message if the bot fails to join the voicechat
                 console.log(err);
@@ -137,7 +141,7 @@ export class PlayCommand extends AbstractCommand {
         return playOpts;
     }
 */
-    private play(guild: Guild, song: ISong, queue: Map<string, IQueue>): void {
+    private async play(guild: Guild, song: ISong, queue: Map<string, IQueue>): Promise<void> {
         const serverQueue = queue.get(guild.id);
 
         if (!serverQueue) return;
@@ -148,25 +152,24 @@ export class PlayCommand extends AbstractCommand {
             return;
         }
 
-        let audioStream = ytdl(song.url, this.ytdlDownloadConfig)
-            .on('finish', () => this.songFinishHandler(guild, serverQueue, queue))
-            .on('error', (error: Error) => {
-                console.error(error);
-                serverQueue.voiceChannel.leave();
-                queue.delete(guild.id);
-                return;
-            });
+        let audioStream = await ytdl(song.url);
         console.log(audioStream);
         const dispatcher = serverQueue.connection.play(audioStream, {
-            type: "unknown"
+            type: "opus"
+        }).on('finish', async () => this.songFinishHandler(guild, serverQueue, queue))
+        .on('error', (error: Error) => {
+            console.error(error);
+            serverQueue.voiceChannel.leave();
+            queue.delete(guild.id);
+            return;
         });
 
         dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
         serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
     }
 
-    private songFinishHandler(guild: Guild, serverQueue: IQueue, queue: Map<string, IQueue>): void {
+    private async songFinishHandler(guild: Guild, serverQueue: IQueue, queue: Map<string, IQueue>): Promise<void> {
         serverQueue.songs.shift();
-        this.play(guild, serverQueue.songs[0], queue);
+        await this.play(guild, serverQueue.songs[0], queue);
     }
 }
