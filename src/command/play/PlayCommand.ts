@@ -21,7 +21,8 @@ export class PlayCommand extends AbstractCommand {
 
     private ytdlDownloadConfig: any = {
         filter: "audioonly",
-        opusEncoded: true,
+        opusEncoded: false,
+        fmt: "mp3",
         encoderArgs: ['-af', 'bass=g=10,dynaudnorm=f=200']
     };
 
@@ -157,7 +158,7 @@ export class PlayCommand extends AbstractCommand {
             });
         console.log(audioStream);
         const dispatcher = serverQueue.connection.play(audioStream, {
-            type: "opus"
+            type: "unknown"
         });
 
         dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
