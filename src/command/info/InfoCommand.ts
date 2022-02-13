@@ -1,8 +1,10 @@
 import { Message, MessageEmbed, MessageOptions } from "discord.js";
-import { IQueue } from "../../song/IQueue";
+import { IQueue } from "../models/IQueue";
 import { AbstractCommand } from "../AbstractCommand";
 import { Command } from "../Command";
+import { injectable } from "inversify";
 
+@injectable()
 export class InfoCommand extends AbstractCommand {
     public readonly name: Command = Command.info;
 

@@ -1,5 +1,5 @@
 import { DMChannel, NewsChannel, TextChannel, VoiceChannel, VoiceConnection } from "discord.js";
-import { ISong } from "./ISong";
+import { ISong } from "../../api/models/ISong";
 
 export interface IQueue {
     textChannel: TextChannel | DMChannel | NewsChannel;

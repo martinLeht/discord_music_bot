@@ -1,35 +1,29 @@
-import { Client, Collection, Guild, Message, User } from "discord.js";
+import { Client, Message } from "discord.js";
 import { inject, injectable } from "inversify";
-import { commands } from '../command';
+import { CommandFactory } from '../command/CommandFactory';
 import { TOKEN, PREFIX } from "../config/config";
 import { TYPES } from "../config/types";
 import { Command } from "../command/Command";
 import { ICommand } from "../command/ICommand";
-import { IQueue } from "../song/IQueue";
+import { IQueue } from "../command/models/IQueue";
 
 @injectable()
 export class DiscordBot {
     private client: Client;
-    private commands: Collection<Command, ICommand>;
+    private commandFactory: CommandFactory;
     private queue: Map<string, IQueue>;
     private readonly token: string = TOKEN;
 
     constructor(
-        @inject(TYPES.Client) client: Client
+        @inject(TYPES.Client) client: Client,
+        @inject(TYPES.CommandFactory) commandFactory: CommandFactory
     ) {
         this.client = client;
-        this.commands = new Collection();
+        this.commandFactory = commandFactory;
         this.queue = new Map();
-        this.initCommands();
     }
 
-    private initCommands(): void {
-        for (const cmd of commands) {
-            this.commands.set(cmd.name, cmd);
-        }
-    }
-
-    public listen(): Promise < string > {
+    public listen(): Promise <string> {
         this.client.on('message', async (message: Message) => {
             if (message.content.startsWith('!join') && message.member?.voice.channel) {
                 message.member.voice.channel.join();
@@ -41,7 +35,7 @@ export class DiscordBot {
                 if (!cmdKey) return;
 
                 cmdKey = cmdKey.toLowerCase();
-                let cmd = this.getCommand(cmdKey); 
+                const cmd = this.getCommand(cmdKey); 
                 
                 if (!cmd) return;
                 try {
@@ -76,6 +70,6 @@ export class DiscordBot {
 
     private getCommand(cmdKey: string): ICommand | undefined {
         const cmd: Command = Command[cmdKey as keyof typeof Command];
-        return this.commands.get(cmd);
+        return this.commandFactory.getCommand(cmd);
     }
 }

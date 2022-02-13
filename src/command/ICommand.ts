@@ -1,5 +1,5 @@
 import { Message, VoiceChannel } from "discord.js";
-import { IQueue } from "../song/IQueue";
+import { IQueue } from "./models/IQueue";
 import { Command } from "./Command";
 
 export interface ICommand {

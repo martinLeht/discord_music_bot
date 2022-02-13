@@ -14,3 +14,5 @@ export const PORT = process.env.PORT;
 export const TOKEN = process.env.TOKEN ? process.env.TOKEN : "";
 export const PREFIX = process.env.CMD_PREFIX ? process.env.CMD_PREFIX : "!" ;
 export const OPT_PREFIX = process.env.OPT_PREFIX ? process.env.OPT_PREFIX : "-" ;
+export const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID ? process.env.SPOTIFY_CLIENT_ID : "";
+export const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET ? process.env.SPOTIFY_CLIENT_SECRET : "";

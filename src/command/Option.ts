@@ -1,3 +1,5 @@
 export enum Option {
-    startAt
+    startAt,
+    playlist,
+    spotifyPlaylist
 }

@@ -1,11 +1,13 @@
 import { Message, VoiceChannel } from "discord.js";
-import { IQueue } from "../song/IQueue";
+import { IQueue } from "./models/IQueue";
 import { Command } from "./Command";
 import { ICommand } from "./ICommand";
 import { Option } from "./Option";
 import { OPT_PREFIX } from "../config/config";
 import { IOption } from "./IOption";
+import { injectable } from "inversify";
 
+@injectable()
 export abstract class AbstractCommand implements ICommand {
     abstract readonly name: Command;
 
@@ -30,7 +32,7 @@ export abstract class AbstractCommand implements ICommand {
 
     public getOptions(message: Message, args: string[]): IOption[] {
         let optArgs: IOption[] = [];
-        for (const arg of args) {
+        for (let arg of args) {
             if (this.isOptionArg(arg)) {
                 /**
                  * Option can hold a value. 
@@ -44,7 +46,7 @@ export abstract class AbstractCommand implements ICommand {
                         value: optArg[1] ? optArg[1] : undefined
                     });
                 } else {
-                    message.channel.send(`Invalid option for command !play: **-${optArg[0]}**\n`
+                    message.channel.send(`Invalid option for command !${this.name}: **${optArg[0]}**\n`
                                         + `Checkout available options for each command by typing **!info** in the chat.`);
                 }
             }
@@ -59,7 +61,7 @@ export abstract class AbstractCommand implements ICommand {
     private getOption(optKey: string): Option | undefined {
         const opt: Option = Option[optKey as keyof typeof Option];
         if (this.options !== undefined) {
-            for (const option of this.options) {
+            for (let option of this.options) {
                 if (opt === option) {
                     return option;
                 }

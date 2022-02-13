@@ -1,8 +1,10 @@
 import { Guild, Message } from "discord.js";
-import { IQueue } from "../../song/IQueue";
+import { IQueue } from "../models/IQueue";
 import { AbstractCommand } from "../AbstractCommand";
 import { Command } from "../Command";
+import { injectable } from "inversify";
 
+@injectable()
 export class SkipCommand extends AbstractCommand {
 
     public readonly name: Command = Command.skip;

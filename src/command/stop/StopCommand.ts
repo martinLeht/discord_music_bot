@@ -1,10 +1,11 @@
 import { Guild, Message } from "discord.js";
-import { IQueue } from "../../song/IQueue";
+import { IQueue } from "../models/IQueue";
 import { AbstractCommand } from "../AbstractCommand";
 import { Command } from "../Command";
-import { ICommand } from "../ICommand";
+import { injectable } from "inversify";
 
-export class StopCommand extends AbstractCommand implements ICommand {
+@injectable()
+export class StopCommand extends AbstractCommand {
 
     public readonly name: Command = Command.stop;
 
