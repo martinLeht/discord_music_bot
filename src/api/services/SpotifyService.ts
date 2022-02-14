@@ -19,10 +19,10 @@ export class SpotifyService {
       
     private initAccessToken() {
         // Retrieve an access token.
-        this.spotifyApi.clientCredentialsGrant().then((data) => {
+        this.spotifyApi.clientCredentialsGrant().then((data: any) => {
             // Save the access token so that it's used in future calls
             this.spotifyApi.setAccessToken(data.body['access_token']);
-        }, (err) => {
+        }, (err: any) => {
             console.log('Something went wrong when retrieving an access token', err);
         });
     } 
@@ -33,7 +33,7 @@ export class SpotifyService {
             const data = await this.spotifyApi.clientCredentialsGrant();
             // Save the access token so that it's used in future calls
             this.spotifyApi.setAccessToken(data.body['access_token']);
-        } catch (err) {
+        } catch (err: any) {
             console.log('Something went wrong when retrieving an access token', err);
         }
     }
@@ -44,7 +44,7 @@ export class SpotifyService {
             if (playlistData.body.playlists) {
                 let playlistFound;
                 if (owner) {
-                    playlistFound = playlistData.body.playlists.items.find(playlist => {
+                    playlistFound = playlistData.body.playlists.items.find((playlist: any) => {
                         const displayName = playlist.owner.display_name;
                         console.log(playlist.owner);
                         if (displayName) {
@@ -73,10 +73,10 @@ export class SpotifyService {
                 const tracks = tracksData.body.items;
 
                 if (tracks.length > 0) {
-                    const songs: ISong[] = tracks.map(trackData => {
+                    const songs: ISong[] = tracks.map((trackData: any) => {
                         return {
                             title: trackData.track.name,
-                            artists: trackData.track.artists.map(artist => artist.name),
+                            artists: trackData.track.artists.map((artist: any) => artist.name),
                             album: trackData.track.album.name
                         }
                     });
