@@ -1,4 +1,5 @@
 import { Client, Message } from "discord.js";
+import { joinVoiceChannel } from "@discordjs/voice";
 import { inject, injectable } from "inversify";
 import { CommandFactory } from '../command/CommandFactory';
 import { TOKEN, PREFIX } from "../config/config";
@@ -24,9 +25,13 @@ export class DiscordBot {
     }
 
     public listen(): Promise <string> {
-        this.client.on('message', async (message: Message) => {
-            if (message.content.startsWith('!join') && message.member?.voice.channel) {
-                message.member.voice.channel.join();
+        this.client.on('messageCreate', async (message: Message) => {
+            if (message.content.startsWith('!join') && message.member?.voice.channel && message.guild) {
+                joinVoiceChannel({
+                    channelId: message.member.voice.channel.id,
+                    guildId: message.guild.id,
+                    adapterCreator: message.guild.voiceAdapterCreator
+                });
             } else {
                 if (!message.content.startsWith(PREFIX) || message.author.bot) return;
 
@@ -42,11 +47,9 @@ export class DiscordBot {
                     await cmd.execute(message, args, this.queue);
                 } catch (err) {
                     console.log('Something went wrong...\n' + err);
-                    message.reply('Something went wrong...\n' + err);
+                    await message.reply('Something went wrong...\n' + err);
                 }
             }
-
-            
         });
 
         this.client.once('ready', () => {

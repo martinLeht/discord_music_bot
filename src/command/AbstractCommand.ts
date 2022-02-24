@@ -1,4 +1,5 @@
-import { Message, VoiceChannel } from "discord.js";
+import { Message, VoiceChannel, Permissions } from "discord.js";
+const { TextChannel } = require('discord.js');
 import { IQueue } from "./models/IQueue";
 import { Command } from "./Command";
 import { ICommand } from "./ICommand";
@@ -24,13 +25,13 @@ export abstract class AbstractCommand implements ICommand {
         if (!message.client.user) return false;
         const permissions = voiceChannel.permissionsFor(message.client.user);
 
-        if (!permissions?.has("CONNECT") || !permissions.has("SPEAK")) {
+        if (!permissions?.has([Permissions.FLAGS.CONNECT]) || !permissions.has([Permissions.FLAGS.SPEAK])) {
             return false;
         }
         return true;
     }
 
-    public getOptions(message: Message, args: string[]): IOption[] {
+    public getOptions(textChannel: any, args: string[]): IOption[] {
         let optArgs: IOption[] = [];
         for (let arg of args) {
             if (this.isOptionArg(arg)) {
@@ -46,8 +47,8 @@ export abstract class AbstractCommand implements ICommand {
                         value: optArg[1] ? optArg[1] : undefined
                     });
                 } else {
-                    message.channel.send(`Invalid option for command !${this.name}: **${optArg[0]}**\n`
-                                        + `Checkout available options for each command by typing **!info** in the chat.`);
+                    textChannel.send({content: `Invalid option for command !${this.name}: **${optArg[0]}**\n`
+                    + `Checkout available options for each command by typing **!info** in the chat.` });
                 }
             }
         }

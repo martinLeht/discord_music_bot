@@ -1,4 +1,5 @@
-import { Message, MessageEmbed, MessageOptions } from "discord.js";
+import { Message, MessageEmbed } from "discord.js";
+const { TextChannel } = require('discord.js');
 import { IQueue } from "../models/IQueue";
 import { AbstractCommand } from "../AbstractCommand";
 import { Command } from "../Command";
@@ -9,20 +10,25 @@ export class InfoCommand extends AbstractCommand {
     public readonly name: Command = Command.info;
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
-        if (!this.isMemberInVoiceChannel(message)) {
-            return message.channel.send(
-                "You have to be in a voice channel to stop the music!"
-            );
-        }
-        const infoMsg: MessageEmbed = this.constructEmbedInfo();
+        if (message.channel.type === 'GUILD_TEXT') {
+            const textChannel: typeof TextChannel = message.channel;
+            if (!this.isMemberInVoiceChannel(message)) {
+                return textChannel.send(
+                    "You have to be in a voice channel to stop the music!"
+                );
+            }
+            const infoMsg: MessageEmbed = this.constructEmbedInfo();
 
-        return message.channel.send({ embed: infoMsg });
+            return textChannel.send({ embeds: [infoMsg] });
+        } else {
+            return;
+        }
     }
 
     private constructEmbedInfo(): MessageEmbed {
         const infoMessage: MessageEmbed = new MessageEmbed()
             .setColor('#0099ff')
-            .setAuthor('Dj Nippon by Nippon Squad', 'https://wallpaperaccess.com/full/2840971.jpg', 'https://steamcommunity.com/groups/nipponsquad')
+            .setTitle('Dj Nippon by Nippon Squad')
             .setThumbnail('https://wallpaperaccess.com/full/2840971.jpg')
             .setDescription('A simple music player that can be used through chat with command prefix \"!\" before command (examples below).\n\n' 
                 + 'Play music by song name or youtube URL and add them to queue. Control the playing music by skipping songs or stopping music completely.\n\n'
@@ -30,15 +36,21 @@ export class InfoCommand extends AbstractCommand {
             .addFields(
                 { 
                     name: 'Play music:', 
-                    value: '!play <song name> OR <url>\n'
-                            + 'Play Options:\n'
-                            + '-startAt=< number in seconds >\n'
-                            + 'E.g.: **-startAt=25**', 
+                    value: '!play <SONG NAME> OR <URL>\n'
+                            + 'E.g.: **!play lotr playlist**\n'
+                            + 'E.g.: **!play https://www.youtube.com/watch?v=CahOLfYxiq0**\n\n'
+                            + '**Play options:**\n'
+                            + '-spotifyPlaylist=<NAME> or <query by NAME and OWNER>\n'
+                            + 'E.g.: !play **-spotifyPlaylist=lotr playlist**\n'
+                            + 'E.g.: !play **-spotifyPlaylist=name:lotr playlist owner:Impact Records**',
                     inline: true 
                 },
                 { 
                     name: 'Skip song:', 
-                    value: '!skip', 
+                    value: '!skip'
+                            + '**Skip options:**\n'
+                            + '-to <TRACK INDEX>\n'
+                            + 'E.g.: !skip **-to 3**',
                     inline: true 
                 },
                 { 

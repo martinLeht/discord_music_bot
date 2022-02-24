@@ -1,5 +1,8 @@
+import { AudioResource, createAudioResource, demuxProbe } from "@discordjs/voice";
 import { injectable } from "inversify";
-import ytdl from "ytdl-core-discord";
+import ytdl from "ytdl-core";
+//import { exec as ytdlExec } from 'youtube-dl-exec';
+import { stream } from 'play-dl';
 import { ISong } from "../models/ISong";
 const ytsr = require('ytsr');
 
@@ -49,8 +52,57 @@ export class YoutubeService {
     }
 
     public async getAudioStream(songUrl: string) {
-        const audioStream = await ytdl(songUrl, { quality: 'highestaudio', filter: 'audioonly' });
+        //const audioStream = await ytdl(songUrl, { quality: 'highestaudio', filter: 'audioonly' });
+        const audioStream = await stream(songUrl)
         return audioStream;
     }
 
+    /*
+    public getAudioResource(url: string, callbackFunc?: (audioResource: AudioResource) => void): Promise<AudioResource<any> | null> {
+        return new Promise((resolve, reject) => {
+            console.log("Executing YTDL process");
+            const ytdlProcess = ytdlExec(
+                url,
+                {
+                    output: '-',
+                    quiet: false,
+                    format: 'bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio',
+                    limitRate: '100K',
+                },
+                { stdio: ['ignore', 'pipe', 'ignore'] },
+            );
+            if (!ytdlProcess.stdout) {
+                reject(new Error('No stdout'));
+				return;
+            }
+            const stream = ytdlProcess.stdout;
+    
+            try {
+                ytdlProcess
+                    .once('spawn', async () => {
+                        const probeInfo = await demuxProbe(stream);
+                        console.log("Demux probe:");
+                        console.log(probeInfo);
+                        if (probeInfo) {
+                            const audioResource = createAudioResource(probeInfo.stream, { inputType: probeInfo.type });
+                            console.log(audioResource);
+                            console.log(callbackFunc);
+                            if (callbackFunc) callbackFunc(audioResource);
+                            resolve(audioResource);
+                        }
+                        resolve(null);
+                    });
+            } catch (err) {
+                console.log("Error on audiostream creation:");
+                console.log(err);
+                if (!ytdlProcess.killed) ytdlProcess.kill();
+                stream.resume();
+                reject(err);
+            }
+
+        });
+        
+        
+	}
+*/
 }

@@ -1,4 +1,6 @@
-import { Guild, Message, MessageEmbed, VoiceChannel } from "discord.js";
+import { Client, Guild, Message, MessageEmbed, VoiceChannel } from "discord.js";
+import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayer, VoiceConnection, AudioResource, AudioPlayerStatus, demuxProbe } from "@discordjs/voice";
+const { TextChannel } = require('discord.js');
 import { Command } from "../Command";
 import { AbstractCommand } from "../AbstractCommand";
 import { ISong } from "../../api/models/ISong";
@@ -10,6 +12,7 @@ import { YoutubeService } from "../../api/services/YoutubeService";
 import { TYPES } from "../../config/types";
 import { SpotifyService } from "../../api/services/SpotifyService";
 import { IPlaylist } from "../../api/models/IPlaylist";
+import { DiscordUtils } from "../../utils/DiscordUtils";
 
 @injectable()
 export class PlayCommand extends AbstractCommand {
@@ -22,54 +25,64 @@ export class PlayCommand extends AbstractCommand {
         Option.spotifyPlaylist
     ];
 
+    private client: Client;
     private youtubeService: YoutubeService;
     private spotifyService: SpotifyService;
 
     constructor(
+        @inject(TYPES.Client) client: Client,
         @inject(TYPES.YoutubeService) youtubeService: YoutubeService,
         @inject(TYPES.SpotifyService) spotifyService: SpotifyService
     ) {
         super();
+        this.client = client;
         this.youtubeService = youtubeService;
         this.spotifyService = spotifyService;
     }
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
-        
-        const voiceChannel = message.member?.voice.channel;
+        if (message.channel.type === 'GUILD_TEXT') {
+            const voiceChannel: VoiceChannel = message.member?.voice.channel as VoiceChannel;
+            const textChannel: typeof TextChannel = message.channel;
+            /* Check permissions */
+            if (!voiceChannel) return textChannel.send("You need to be in a voice channel to play music!");
+    
+            if (!this.hasPermissions(message, voiceChannel)) {
+                return textChannel.send(
+                    "I need the permissions to join and speak in your voice channel! These are the terms if you need me as a private DJ..."
+                );
+            }
 
-        /* Check permissions */
-        if (!voiceChannel) return message.channel.send("You need to be in a voice channel to play music!");
+            if (!message.guild) return textChannel.send("No quild available to handle the queue.");
+            
+            if (!args) return textChannel.send("You need provide arguments (url or video title) to play!");
+    
+            const guild = message.guild;
+            // Extract options from arguments
+            const opts: IOption[] = this.getOptions(message, args);
+            const songArgs = args.filter(arg => !this.isOptionArg(arg));
+            
+            console.log(`Got command: ${args.join(" ")}`);
+    
+            if (opts.length > 0) {
+                if (opts[0].name === Option.playlist || opts[0].name === Option.spotifyPlaylist) {
+                    /* Fetch and play playlist */
+                    const playlist = await this.fetchPlaylist(songArgs, opts);
+                    if (!playlist || playlist.songs.length < 1) {
+                        return textChannel.send(`No playlist found with arguments:  **${args.join(" ")}**`); 
+                    }
 
-        if (!this.hasPermissions(message, voiceChannel)) {
-            return message.channel.send(
-                "I need the permissions to join and speak in your voice channel! These are the terms if you need me as a private DJ..."
-            );
-        }
-
-        if (!args) return message.channel.send("You need provide arguments (url or video title) to play!");
-
-        // Extract options from arguments
-        const opts: IOption[] = this.getOptions(message, args);
-        const songArgs = args.filter(arg => !this.isOptionArg(arg));
-        
-        console.log(`Got command: ${args.join(" ")}`);
-
-        if (opts.length > 0) {
-            if (opts[0].name === Option.playlist || opts[0].name === Option.spotifyPlaylist) {
-                /* Fetch and play playlist */
-                const playlist = await this.fetchPlaylist(songArgs, opts);
-                if (!playlist || playlist.songs.length < 1) {
-                    return message.channel.send(`No playlist found with arguments:  **${args.join(" ")}**`); 
+                    return this.handlePlaylist(textChannel, guild, queue, voiceChannel, playlist);
                 }
-                return this.handlePlaylist(message, queue, voiceChannel, playlist);
+            } else {
+                /* Fetch and play song */
+                const song: ISong | null = await this.fetchSong(songArgs);
+                if(!song) return textChannel.send(`No song found with arguments:  **${args.join(" ")}**`);
+    
+                return this.handleSong(textChannel, guild, queue, voiceChannel, song);
             }
         } else {
-            /* Fetch and play song */
-            const song: ISong | null = await this.fetchSong(songArgs);
-            if(!song) return message.channel.send(`No song found with arguments:  **${args.join(" ")}**`);
-
-            return this.handleSong(message, queue, voiceChannel, song);
+            return;
         }
     }
 
@@ -110,7 +123,7 @@ export class PlayCommand extends AbstractCommand {
                     owner = owner.substr(owner.indexOf(":") + 1);
 
                     console.log(`Search parameters: \nNAME = ${name} \nOWNER = ${owner}`);
-                    if (!name) return;
+                    if (!name) return null;
 
                     playlistData = await this.spotifyService.getPlaylist(name, owner);
                 } else {
@@ -146,20 +159,22 @@ export class PlayCommand extends AbstractCommand {
         });
     }
 
-    private async handleSong(message: Message, queue: Map<string, IQueue>, voiceChannel: VoiceChannel, song: ISong) {
-        if (!message.guild) return message.channel.send("No quild available to handle the queue.");
-
-        const guild = message.guild;
-
+    private async handleSong(textChannel: any, guild: Guild, queue: Map<string, IQueue>, voiceChannel: VoiceChannel, song: ISong) {
         const serverQueue = queue.get(guild.id);
         if (!serverQueue) {
             try {
                 // Join the voicechat and save the connection
-                const connection = await voiceChannel.join();
+                const connection = joinVoiceChannel({
+                    channelId: voiceChannel.id,
+                    guildId: guild.id,
+                    adapterCreator: guild.voiceAdapterCreator
+                });
+                const audioPlayer = createAudioPlayer()
                 const queueContract: IQueue = {
-                    textChannel: message.channel,
+                    textChannel: textChannel,
                     voiceChannel: voiceChannel,
                     connection: connection,
+                    audioPlayer: audioPlayer,
                     songs: [],
                     volume: 5,
                     playing: true,
@@ -177,28 +192,30 @@ export class PlayCommand extends AbstractCommand {
                 // Printing the error message if the bot fails to join the voicechat
                 console.log(err);
                 queue.delete(guild.id);
-                return message.channel.send(err);
+                return textChannel.send(err);
             }
         } else {
             serverQueue.songs.push(song);
-            return message.channel.send(`Added to the queue: **${song.title}**`);
+            return textChannel.send(`Added to the queue: **${song.title}**`);
         }
     }
 
-    private async handlePlaylist(message: Message, queue: Map<string, IQueue>, voiceChannel: VoiceChannel, playlist: IPlaylist) {
-        if (!message.guild) return message.channel.send("No quild available to handle the queue.");
-
-        const guild = message.guild;
-
+    private async handlePlaylist(textChannel: any, guild: Guild, queue: Map<string, IQueue>, voiceChannel: VoiceChannel, playlist: IPlaylist) {
         const serverQueue = queue.get(guild.id);
         if (!serverQueue) {
             try {
                 // Join the voicechat and save the connection
-                const connection = await voiceChannel.join();
+                const connection = joinVoiceChannel({
+                    channelId: voiceChannel.id,
+                    guildId: guild.id,
+                    adapterCreator: guild.voiceAdapterCreator,
+                });
+                const audioPlayer = createAudioPlayer()
                 const queueContract: IQueue = {
-                    textChannel: message.channel,
+                    textChannel: textChannel,
                     voiceChannel: voiceChannel,
                     connection: connection,
+                    audioPlayer: audioPlayer,
                     songs: [],
                     volume: 5,
                     playing: true,
@@ -209,8 +226,8 @@ export class PlayCommand extends AbstractCommand {
                 playlist.songs.forEach(song => queueContract.songs.push(song));
                 queue.set(guild.id, queueContract);
 
-                const playlistEmbedMsg: MessageEmbed = this.constructEmbedPlaylist(playlist);
-                message.channel.send({embed: playlistEmbedMsg});
+                const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist(playlist);
+                textChannel.send({embeds: [playlistEmbedMsg]});
                 
                 // Calling the play function to start a song
                 await this.play(guild, queueContract.songs[0], queue);
@@ -218,75 +235,93 @@ export class PlayCommand extends AbstractCommand {
                 // Printing the error message if the bot fails to join the voicechat
                 console.log(err);
                 queue.delete(guild.id);
-                return message.channel.send(err);
+                return textChannel.send(err);
             }
         }
     }
 
-    private constructEmbedPlaylist(playlist: IPlaylist): MessageEmbed {
-
-        const playlistContent = playlist.songs.map((song, i) => {
-            return `${i + 1}. **${song.title}**`
-        })
-
-        const playlistMessage: MessageEmbed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setAuthor(`Playlist: ${playlist.name}`)
-            .setThumbnail('https://wallpaperaccess.com/full/2840971.jpg')
-            .setDescription(playlistContent.join('\r\n'));
-
-        return playlistMessage;
-    }
-
-    /*
-    private handlePlayOpts(opts: IOption[]): any {
-        let playOpts = {};
-        for (const opt of opts) {
-            switch(opt.name) {
-                case Option.startAt:
-                    playOpts.begin = opt.value + 's';
-                    break;
-
-                default: 
-                    break; 
-            }
-        }
-        return playOpts;
-    }
-*/
     private async play(guild: Guild, song: ISong, queue: Map<string, IQueue>): Promise<void> {
         const serverQueue = queue.get(guild.id);
 
         if (!serverQueue) return;
 
-        if (!serverQueue.connection || !song) {
-            serverQueue.voiceChannel.leave();
-            queue.delete(guild.id);
+        if (!song) {
+            this.leaveChannel(serverQueue, queue, guild.id);
             return;
         }
 
         if (song.url) {
-            let audioStream = await this.youtubeService.getAudioStream(song.url);
-            const dispatcher = serverQueue.connection.play(audioStream, {
-                type: "opus"
-            })
-            .on('finish', async () => this.songFinishHandler(guild, serverQueue, queue))
-            .on('error', (error: Error) => {
-                console.error(error);
-                serverQueue.voiceChannel.leave();
-                queue.delete(guild.id);
-                return;
-            });
-    
-            dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
-            serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
+            try {
+                //const resource = await this.youtubeService.getAudioResource(song.url, (audioResource) => serverQueue.audioPlayer.play(audioResource));
+                const audioStream = await this.youtubeService.getAudioStream(song.url);
+
+                const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
+                if (resource) {
+                    serverQueue.songs[0].playing = true;
+                    serverQueue.audioPlayer.play(resource);
+                    serverQueue.audioPlayer.on('error', error => {
+                        console.error("ERROR OCCURED on audio play");
+                        console.error(error);
+                        this.leaveChannel(serverQueue, queue, guild.id);
+                        return;
+                    });
+                    serverQueue.audioPlayer.on(AudioPlayerStatus.Playing, () => {
+                        console.log('The audio player has started playing!');
+                        console.log(serverQueue.songs.find(song => song.playing));
+                    });
+                    serverQueue.audioPlayer.on(AudioPlayerStatus.Idle, () => this.songFinishHandler(guild, serverQueue, queue));
+                    serverQueue.connection.subscribe(serverQueue.audioPlayer);
+
+                    serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
+                } else {
+                    serverQueue.textChannel.send(`Got no audioo resource from YTDL API: **${song.title}**\n ${song.url}`);
+                }
+            } catch (err) {
+                console.log(err);
+                serverQueue.textChannel.send(`An error occured: \n${err}`);
+            }
         } else {
-            serverQueue.textChannel.send(`No track URL available for: **${song.title}`);
+            serverQueue.textChannel.send(`No track URL available for: **${song.title}**`);
         }
     }
 
     private async songFinishHandler(guild: Guild, serverQueue: IQueue, queue: Map<string, IQueue>): Promise<void> {
-        serverQueue.songs.shift();
-        await this.play(guild, serverQueue.songs[0], queue);
+        const currentlyPlayingIndex = serverQueue.songs.findIndex(song => song.playing);
+        if (currentlyPlayingIndex > -1) {
+            serverQueue.songs.splice(currentlyPlayingIndex, 1);
+        }
+
+        serverQueue.songs.forEach(song => song.playing = false);
+        if (serverQueue.songs.length > 0) {
+            serverQueue.songs[0].playing = true;
+
+            const nextTrack: ISong = serverQueue.songs[0];
+
+            if (!nextTrack) {
+                this.leaveChannel(serverQueue, queue, guild.id);
+                return;
+            } else {
+                if (nextTrack.url) {
+                    const audioStream = await this.youtubeService.getAudioStream(nextTrack.url);
+                    const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
+                    serverQueue.audioPlayer.play(resource);
+                    
+                    const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist({ name: "Current Queue", songs: serverQueue.songs });
+                    serverQueue.textChannel.send({embeds: [playlistEmbedMsg]});
+                    serverQueue.textChannel.send(`Start playing: **${nextTrack.title}**\n ${nextTrack.url}`);
+                } else {
+                    serverQueue.textChannel.send(`No track URL available for: **${nextTrack.title}**`);
+                }
+            }
+        } else {
+            this.leaveChannel(serverQueue, queue, guild.id);
+            return;
+        }
+    }
+
+
+    private leaveChannel(serverQueue: IQueue, queue: Map<string, IQueue>, guildId: string) {
+        serverQueue.connection.destroy();
+        queue.delete(guildId);
     }
 }

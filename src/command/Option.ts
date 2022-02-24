@@ -1,5 +1,10 @@
 export enum Option {
+
+    /* Play command options */
     startAt,
     playlist,
-    spotifyPlaylist
+    spotifyPlaylist,
+
+    /* Skip command options */
+    to
 }

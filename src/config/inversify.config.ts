@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { Container } from "inversify";
 import { TYPES } from "./types";
 import { DiscordBot } from "../bot/DiscordBot";
-import { Client } from "discord.js";
+import { Client, Intents } from "discord.js";
 import { YoutubeService } from "../api/services/YoutubeService";
 import { PlayCommand } from "../command/play/PlayCommand";
 import { SkipCommand } from "../command/skip/SkipCommand";
@@ -13,7 +13,13 @@ import { CommandFactory } from "../command/CommandFactory";
 import { SpotifyService } from "../api/services/SpotifyService";
 
 let container = new Container();
-const client = new Client();
+const client = new Client({ 
+    intents: [
+        Intents.FLAGS.GUILDS,
+        Intents.FLAGS.GUILD_MESSAGES,
+        Intents.FLAGS.DIRECT_MESSAGES,
+        Intents.FLAGS.GUILD_VOICE_STATES
+    ], partials: ["CHANNEL"] });
 
 container.bind<DiscordBot>(TYPES.Bot).to(DiscordBot).inSingletonScope();
 container.bind<Client>(TYPES.Client).toConstantValue(client);

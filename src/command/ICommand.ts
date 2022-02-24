@@ -1,4 +1,4 @@
-import { Message, VoiceChannel } from "discord.js";
+import { Message, TextChannel, VoiceChannel } from "discord.js";
 import { IQueue } from "./models/IQueue";
 import { Command } from "./Command";
 

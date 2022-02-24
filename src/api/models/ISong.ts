@@ -6,4 +6,5 @@ export interface ISong {
     album?: string;
     url?: string;
     opts?: IOption[];
+    playing?: boolean;
 }
