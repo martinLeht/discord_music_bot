@@ -41,8 +41,10 @@ export class InfoCommand extends AbstractCommand {
                             + 'E.g.: **!play https://www.youtube.com/watch?v=CahOLfYxiq0**\n\n'
                             + '**Play options:**\n'
                             + '-spotifyPlaylist=<NAME> or <query by NAME and OWNER>\n'
-                            + 'E.g.: !play **-spotifyPlaylist=lotr playlist**\n'
-                            + 'E.g.: !play **-spotifyPlaylist=name:lotr playlist owner:Impact Records**',
+                            + 'E.g.: !play **-spotifyPlaylist lotr playlist**\n'
+                            + 'E.g.: !play **-spotifyPlaylist name:lotr playlist owner:Impact Records**'
+                            + 'E.g.: !play **-spotifyAlbum lotr playlist**\n'
+                            + 'E.g.: !play **-spotifyAlbum name:lotr playlist owner:Impact Records**',
                     inline: true 
                 },
                 { 

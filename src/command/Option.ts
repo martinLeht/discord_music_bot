@@ -4,6 +4,7 @@ export enum Option {
     startAt,
     playlist,
     spotifyPlaylist,
+    spotifyAlbum,
 
     /* Skip command options */
     to
