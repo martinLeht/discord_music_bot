@@ -32,40 +32,29 @@ export class InfoCommand extends AbstractCommand {
             .setThumbnail('https://wallpaperaccess.com/full/2840971.jpg')
             .setDescription('A simple music player that can be used through chat with command prefix \"!\" before command (examples below).\n\n' 
                 + 'Play music by song name or youtube URL and add them to queue. Control the playing music by skipping songs or stopping music completely.\n\n'
-                + 'Commands:')
-            .addFields(
-                { 
-                    name: 'Play music:', 
-                    value: '!play <SONG NAME> OR <URL>\n'
-                            + 'E.g.: **!play lotr playlist**\n'
-                            + 'E.g.: **!play https://www.youtube.com/watch?v=CahOLfYxiq0**\n\n'
-                            + '**Play options:**\n'
-                            + '-spotifyPlaylist=<NAME> or <query by NAME and OWNER>\n'
-                            + 'E.g.: !play **-spotifyPlaylist lotr playlist**\n'
-                            + 'E.g.: !play **-spotifyPlaylist name:lotr playlist owner:Impact Records**'
-                            + 'E.g.: !play **-spotifyAlbum lotr playlist**\n'
-                            + 'E.g.: !play **-spotifyAlbum name:lotr playlist owner:Impact Records**',
-                    inline: true 
-                },
-                { 
-                    name: 'Skip song:', 
-                    value: '!skip'
-                            + '**Skip options:**\n'
-                            + '-to <TRACK INDEX>\n'
-                            + 'E.g.: !skip **-to 3**',
-                    inline: true 
-                },
-                { 
-                    name: 'Stop music:', 
-                    value: '!stop', 
-                    inline: true 
-                },
-                { 
-                    name: 'Info:', 
-                    value: '!info', 
-                    inline: true 
-                },
-            );
+                + 'Commands:\n\n'
+                + '--------- PLAY ---------\n'
+                + '**Play music: ** !play <SONG NAME> OR <URL>\n'
+                + ' - E.g.: **!play lotr playlist**\n'
+                + ' - E.g.: **!play https://www.youtube.com/watch?v=CahOLfYxiq0**\n\n'
+                + '**Play options:**\n'
+                + '-spotifyPlaylist <NAME> or <query by NAME and OWNER> or <query by ID>\n'
+                + '-spotifyAlbum <NAME> or <query by NAME and OWNER> or <query by ID>\n'
+                + ' - E.g.: !play **-spotifyPlaylist lotr playlist**\n'
+                + ' - E.g.: !play **-spotifyPlaylist name:lotr playlist owner:Impact Records**\n'
+                + ' - E.g.: !play **-spotifyPlaylist id:3VUBoaNL92phq6qkFfz9bX**\n'
+                + ' - E.g.: !play **-spotifyAlbum saint fetuan**\n'
+                + ' - E.g.: !play **-spotifyAlbum name:saint fetuan owner:fetti**\n'
+                + ' - E.g.: !play **-spotifyAlbum id:66tJmYOp7o0DQHUdjTJp8r**\n\n'
+                + '--------- SKIP ---------\n'
+                + '**Skip tracks: ** !skip\n\n'
+                + '**Skip options:**\n'
+                + '-to <TRACK INDEX>\n'
+                + ' - E.g.: !skip **-to 3**\n\n'
+                + '--------- STOP ---------\n'
+                + '**Stop player: ** !stop\n\n'
+                + '--------- INFO ---------\n'
+                + '**Command Info: ** !info\n');
 
         return infoMessage;
     }
