@@ -12,13 +12,15 @@ export class CommandFactory {
         @inject(TYPES.Play) playCommand: ICommand,
         @inject(TYPES.Skip) skipCommand: ICommand,
         @inject(TYPES.Stop) stopCommand: ICommand,
-        @inject(TYPES.Info) infoCommand: ICommand
+        @inject(TYPES.Info) infoCommand: ICommand,
+        @inject(TYPES.Queue) queueCommand: ICommand
     ) {
         this.commands = [
             playCommand,
             skipCommand,
             stopCommand,
-            infoCommand
+            infoCommand,
+            queueCommand
         ];
     }
 

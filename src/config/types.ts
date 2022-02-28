@@ -8,6 +8,7 @@ export const TYPES = {
     Skip: Symbol("Skip"),
     Stop: Symbol("Stop"),
     Info: Symbol("Info"),
+    Queue: Symbol("Queue"),
 
     /* Services */
     YoutubeService: Symbol("YoutubeService"),

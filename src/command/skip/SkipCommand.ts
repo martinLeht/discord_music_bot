@@ -5,7 +5,6 @@ import { AbstractCommand } from "../AbstractCommand";
 import { Command } from "../Command";
 import { Option } from '../Option';
 import { inject, injectable } from "inversify";
-import { IPlaylist } from "../../api/models/IPlaylist";
 import { IOption } from "../IOption";
 import { TYPES } from "../../config/types";
 import { YoutubeService } from "../../api/services/YoutubeService";
