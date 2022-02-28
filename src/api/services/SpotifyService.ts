@@ -74,7 +74,7 @@ export class SpotifyService {
 
                 return playlist;
             }
-        } catch (err) {
+        } catch (err: any) {
             if (err.statusCode === 401) {
                 console.log("Spotify access token has expired, refreshing the client access token!");
                 await this.refreshAccessToken();
@@ -117,7 +117,7 @@ export class SpotifyService {
                     break;
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
             if (err.statusCode === 401) {
                 console.log("Spotify access token has expired, refreshing the client access token!");
                 await this.refreshAccessToken();
@@ -165,7 +165,7 @@ export class SpotifyService {
 
                 return playlist;
             }
-        } catch (err) {
+        } catch (err: any) {
             if (err.statusCode === 401) {
                 console.log("Spotify access token has expired, refreshing the client access token!");
                 await this.refreshAccessToken();
@@ -221,7 +221,7 @@ export class SpotifyService {
                 }
             }
             
-        } catch (err) {
+        } catch (err: any) {
             if (err.statusCode === 401) {
                 console.log("Spotify access token has expired, refreshing the client access token!");
                 await this.refreshAccessToken();
@@ -263,7 +263,7 @@ export class SpotifyService {
 
                 return album;
             }
-        } catch (err) {
+        } catch (err: any) {
             if (err.statusCode === 401) {
                 console.log("Spotify access token has expired, refreshing the client access token!");
                 await this.refreshAccessToken();
