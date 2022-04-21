@@ -159,7 +159,7 @@ export class PlayCommand extends AbstractCommand {
                         console.log(`Searchterms for playlist: ${searchKeywords}`)
                         const song = await this.youtubeService.getSongBySearch(searchKeywords);
                         if (song) songData.url = song.url;
-                        await this.delay(300);
+                        await this.delay(500);
                         return songData;
                     }));
                     playlist = {
