@@ -53,7 +53,7 @@ export class YoutubeService {
 
     public async getAudioStream(songUrl: string) {
         //const audioStream = await ytdl(songUrl, { quality: 'highestaudio', filter: 'audioonly' });
-        const audioStream = await stream(songUrl)
+        const audioStream = await stream(songUrl, { discordPlayerCompatibility: true });
         return audioStream;
     }
 
