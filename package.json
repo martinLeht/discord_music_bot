@@ -31,7 +31,7 @@
     "inversify": "^5.1.1",
     "libsodium-wrappers": "^0.7.9",
     "nodemon": "^2.0.12",
-    "play-dl": "^1.8.8",
+    "play-dl": "^1.9.4",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "spotify-web-api-node": "^5.0.2",
