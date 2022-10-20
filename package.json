@@ -21,7 +21,6 @@
     "@types/node": "^16.7.2",
     "@types/spotify-web-api-node": "^5.0.7",
     "cross-env": "^7.0.3",
-    "discord-ytdl-core": "^5.0.4",
     "discord.js": "^13.6.0",
     "dotenv": "^10.0.0",
     "ffmpeg": "^0.0.4",
@@ -38,7 +37,7 @@
     "ts-node": "^10.2.1",
     "typescript": "^4.3.5",
     "youtube-dl-exec": "^2.0.5",
-    "ytdl-core": "^4.11.0",
+    "ytdl-core": "^4.11.2",
     "ytdl-core-discord": "^1.3.1",
     "ytsr": "^3.5.3"
   },
