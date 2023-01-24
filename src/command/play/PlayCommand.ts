@@ -148,7 +148,10 @@ export class PlayCommand extends AbstractCommand {
                 };
 
                 // Pushing the song to songs array
-                if (!song || !song.url) return;
+                if (!song || !song.url) {
+                    this.leaveChannel(queueContract, queue, guild.id);
+                    return;
+                }
                 queueContract.songs.push(song);
                 queue.set(guild.id, queueContract);
 
@@ -162,6 +165,7 @@ export class PlayCommand extends AbstractCommand {
                 return textChannel.send(err);
             }
         } else {
+            if (!song || !song.url) return;
             serverQueue.songs.push(song);
             return textChannel.send(`Added to the queue: **${song.title}**`);
         }
@@ -192,6 +196,11 @@ export class PlayCommand extends AbstractCommand {
                 };
 
                 playlist.songs.filter(song => !!song.url).forEach(song => queueContract.songs.push(song));
+                if (queueContract.songs.length < 1) {
+                    this.leaveChannel(queueContract, queue, guild.id);
+                    return;
+                } 
+
                 queue.set(guild.id, queueContract);
 
                 const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist(playlist);
@@ -207,7 +216,12 @@ export class PlayCommand extends AbstractCommand {
             }
         } else {
             serverQueue.songs = [];
-            playlist.songs.forEach(song => serverQueue.songs.push(song));
+            playlist.songs.filter(song => !!song.url).forEach(song => serverQueue.songs.push(song));
+
+            if (serverQueue.songs.length < 1) {
+                this.leaveChannel(serverQueue, queue, guild.id);
+                return;
+            } 
 
             const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist(playlist);
             textChannel.send({embeds: [playlistEmbedMsg]});
