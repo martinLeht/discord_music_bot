@@ -292,12 +292,12 @@ export class PlayCommand extends AbstractCommand {
             serverQueue.songs.forEach(song => song.playing = false);
 
             let nextTrackIndex = 0;
-            if (currentlyPlayingIndex > -1) {
+            if (currentlyPlayingIndex > 0 && serverQueue.songs.length > 1) {
                 nextTrackIndex = currentlyPlayingIndex;
             }
 
             serverQueue.songs[nextTrackIndex].playing = true;
-            const nextTrack: ISong = serverQueue.songs[0];
+            const nextTrack: ISong = serverQueue.songs[nextTrackIndex];
 
             if (!nextTrack) {
                 this.leaveChannel(serverQueue, queue, guild.id);
