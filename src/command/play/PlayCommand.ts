@@ -148,7 +148,7 @@ export class PlayCommand extends AbstractCommand {
                 };
 
                 // Pushing the song to songs array
-                if (!song) return;
+                if (!song || !song.url) return;
                 queueContract.songs.push(song);
                 queue.set(guild.id, queueContract);
 
