@@ -128,6 +128,7 @@ export class PlayCommand extends AbstractCommand {
 
     private async handleSong(textChannel: any, guild: Guild, queue: Map<string, IQueue>, voiceChannel: VoiceChannel, song: ISong) {
         const serverQueue = queue.get(guild.id);
+        console.log(song);
         if (!serverQueue) {
             try {
                 // Join the voicechat and save the connection
@@ -146,9 +147,9 @@ export class PlayCommand extends AbstractCommand {
                     volume: 5,
                     playing: true,
                 };
-
+                
                 // Pushing the song to songs array
-                if (!song || !song.url) {
+                if (!song || !song.url || !song.title) {
                     this.leaveChannel(queueContract, queue, guild.id);
                     return;
                 }
@@ -165,7 +166,7 @@ export class PlayCommand extends AbstractCommand {
                 return textChannel.send(err);
             }
         } else {
-            if (!song || !song.url) return;
+            if (!song || !song.url || !song.title) return;
             serverQueue.songs.push(song);
             return textChannel.send(`Added to the queue: **${song.title}**`);
         }
