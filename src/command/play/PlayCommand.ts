@@ -191,7 +191,7 @@ export class PlayCommand extends AbstractCommand {
                     playing: true,
                 };
 
-                playlist.songs.forEach(song => queueContract.songs.push(song));
+                playlist.songs.filter(song => !!song.url).forEach(song => queueContract.songs.push(song));
                 queue.set(guild.id, queueContract);
 
                 const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist(playlist);
