@@ -150,6 +150,7 @@ export class PlayCommand extends AbstractCommand {
                 
                 // Pushing the song to songs array
                 if (!song || !song.url || !song.title) {
+                    textChannel.send('Could not add song...');
                     this.leaveChannel(queueContract, queue, guild.id);
                     return;
                 }
@@ -166,7 +167,10 @@ export class PlayCommand extends AbstractCommand {
                 return textChannel.send(err);
             }
         } else {
-            if (!song || !song.url || !song.title) return;
+            if (!song || !song.url || !song.title) {
+                serverQueue.textChannel.send('Could not add song...');
+                return;
+            }
             serverQueue.songs.push(song);
             return textChannel.send(`Added to the queue: **${song.title}**`);
         }
