@@ -86,7 +86,7 @@ export class PlayCommand extends AbstractCommand {
             } else {
                 /* Fetch and play song */
                 const song: ISong | null = await this.fetchSong(songArgs);
-                if(!song) return textChannel.send(`No song found with arguments:  **${args.join(" ")}**`);
+                if(!song || !song.url) return textChannel.send(`No song found with arguments:  **${args.join(" ")}**`);
     
                 return this.handleSong(textChannel, guild, queue, voiceChannel, song);
             }
