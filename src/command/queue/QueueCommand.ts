@@ -16,7 +16,7 @@ export class QueueCommand extends AbstractCommand {
             const textChannel: typeof TextChannel = message.channel;
             if (!this.isMemberInVoiceChannel(message)) {
                 return textChannel.send(
-                    "You have to be in a voice channel to skip a song!"
+                    "You have to be in a voice channel to view the queue!"
                 );
             }
             
@@ -26,12 +26,12 @@ export class QueueCommand extends AbstractCommand {
             const serverQueue = queue.get(guild.id);
 
             if (!serverQueue) {
-                return textChannel.send("There is no song that I could skip!");
+                return textChannel.send("There are no tracks in the queue!");
             }
 
             if (!serverQueue.connection) {
                 this.leaveChannel(serverQueue, queue, guild.id);
-                return textChannel.send("Something went wrong on song dispatching...");
+                return textChannel.send("Something went wrong on server queue connection...");
             }
 
             if (serverQueue.songs.length > 0) {

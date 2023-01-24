@@ -102,12 +102,16 @@ export class SkipCommand extends AbstractCommand {
             } else {
                 if (nextTrack.url) {
                     const audioStream = await this.youtubeService.getAudioStream(nextTrack.url);
-                    const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
-                    serverQueue.audioPlayer.play(resource);
-                    
-                    const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist({ name: "Current Queue", songs: serverQueue.songs });
-                    serverQueue.textChannel.send({embeds: [playlistEmbedMsg]});
-                    serverQueue.textChannel.send(`Start playing: **${nextTrack.title}**\n ${nextTrack.url}`);
+                    if (audioStream) {
+                        const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
+                        serverQueue.audioPlayer.play(resource);
+                        
+                        const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist({ name: "Current Queue", songs: serverQueue.songs });
+                        serverQueue.textChannel.send({embeds: [playlistEmbedMsg]});
+                        serverQueue.textChannel.send(`Start playing: **${nextTrack.title}**\n ${nextTrack.url}`);
+                    } else {
+                        serverQueue.textChannel.send(`Could not extract audio stream for: **${nextTrack.title}**`);
+                    }
                 } else {
                     serverQueue.textChannel.send(`No track URL available for: **${nextTrack.title}**`);
                 }

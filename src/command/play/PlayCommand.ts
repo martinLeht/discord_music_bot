@@ -76,7 +76,7 @@ export class PlayCommand extends AbstractCommand {
                     return this.handlePlaylist(textChannel, guild, queue, voiceChannel, playlist);
                 } else if (opts[0].name === Option.spotifyAlbum) {
                     /* Fetch and play playlist */
-                    const album = await this.fetchAlbum(songArgs, opts);
+                    const album = await this.fetchAlbum(songArgs);
                     if (!album || album.songs.length < 1) {
                         return textChannel.send(`No album found with arguments:  **${args.join(" ")}**`); 
                     }
@@ -96,146 +96,34 @@ export class PlayCommand extends AbstractCommand {
     }
 
     private async fetchSong(songArgs: string[]): Promise<ISong | null> {
-        let song: ISong | null = null;
-
         if (songArgs[0].includes("www.youtube.com/watch?")) {
-            song = await this.youtubeService.getSongByUrl(songArgs[0]);
+            return await this.youtubeService.getSongByUrl(songArgs[0]);
         } else {
             const searchKeywords = songArgs.join(" ");
-            song = await this.youtubeService.getSongBySearch(searchKeywords);
+            return await this.youtubeService.getSongBySearch(searchKeywords);
         }
-        return song;
     }
 
     private async fetchPlaylist(songArgs: string[], opts: IOption[]) {
-        let playlist = null;
-
-        
-        switch(opts[0].name) {
-            case Option.playlist:
-
-                break;
-            case Option.spotifyPlaylist:
-                let playlistData;
-                const queryArgs = songArgs.filter(arg => arg.includes("name:") || arg.includes("owner:") || arg.includes("id:"));
-                if (queryArgs.length > 0) {
-                    if (queryArgs.length === 1) {
-                        const idQueryParamIndex = songArgs.findIndex(arg => arg.includes("id:"));
-                        const idArg = songArgs.slice(idQueryParamIndex);
-    
-                        let id = idArg.join(" ");
-                        id = id.substr(id.indexOf(":") + 1);
-    
-                        console.log(`Search parameters: \nID = ${id}`);
-                        if (!id) return null;
-    
-                        playlistData = await this.spotifyService.getPlaylistById(id);
-                    } else if (queryArgs.length === 2) {
-                        const nameQueryParamIndex = songArgs.findIndex(arg => arg.includes("name:"));
-                        const ownerQueryParamIndex = songArgs.findIndex(arg => arg.includes("owner:"));
-                        const nameArgs = songArgs.slice(nameQueryParamIndex, ownerQueryParamIndex);
-                        const ownerArgs = songArgs.slice(ownerQueryParamIndex);
-    
-                        let name = nameArgs.join(" ");
-                        name = name.substr(name.indexOf(":") + 1);
-    
-                        let owner = ownerArgs.join(" ");
-                        console.log(owner);
-                        owner = owner.substr(owner.indexOf(":") + 1);
-    
-                        console.log(`Search parameters: \nNAME = ${name} \nOWNER = ${owner}`);
-                        if (!name) return null;
-    
-                        playlistData = await this.spotifyService.getPlaylist(name, owner);
-                    }
-                } else {
-                    const searchKeywords = songArgs.join(" ");
-                    playlistData = await this.spotifyService.getPlaylist(searchKeywords);
-                }
-                
-                if (playlistData) {
-                    const songs: ISong[] = await Promise.all(playlistData.songs.map(async songData => {
-                        const searchKeywords = `${songData.title} ${songData.artists?.join(" ")}`;
-                        console.log(`Searchterms for playlist: ${searchKeywords}`)
-                        const song = await this.youtubeService.getSongBySearch(searchKeywords);
-                        if (song) songData.url = song.url;
-                        await this.delay(500);
-                        return songData;
-                    }));
-                    playlist = {
-                        name: playlistData.name,
-                        songs: songs
-                    }
-                }
-                break;
+        if (opts[0].name === Option.playlist) {
+            //TODO: implement support to fetch youtube playlist
+            return null;
+        } else if (opts[0].name === Option.spotifyPlaylist) {
+            const playlistData = await this.spotifyService.getPlaylistByArguments(songArgs);
+            if (playlistData) {
+                return await this.youtubeService.getSongsAsPlaylist(playlistData.songs, playlistData.name);
+            }
         }
-        return playlist;
+
+        return null;
     }
 
-    private async fetchAlbum(songArgs: string[], opts: IOption[]) {
-        let album = null;
-
-        let albumData;
-        const queryArgs = songArgs.filter(arg => arg.includes("name:") || arg.includes("owner:") || arg.includes("id:"));
-        if (queryArgs.length > 0) {
-            if (queryArgs.length === 1) {
-                const idQueryParamIndex = songArgs.findIndex(arg => arg.includes("id:"));
-                const idArg = songArgs.slice(idQueryParamIndex);
-
-                let id = idArg.join(" ");
-                id = id.substr(id.indexOf(":") + 1);
-
-                console.log(`Search parameters: \nID = ${id}`);
-                if (!id) return null;
-
-                albumData = await this.spotifyService.getAlbumById(id);
-            } else if (queryArgs.length === 2) {
-                const nameQueryParamIndex = songArgs.findIndex(arg => arg.includes("name:"));
-                const ownerQueryParamIndex = songArgs.findIndex(arg => arg.includes("owner:"));
-                const nameArgs = songArgs.slice(nameQueryParamIndex, ownerQueryParamIndex);
-                const ownerArgs = songArgs.slice(ownerQueryParamIndex);
-
-                let name = nameArgs.join(" ");
-                name = name.substr(name.indexOf(":") + 1);
-
-                let owner = ownerArgs.join(" ");
-                console.log(owner);
-                owner = owner.substr(owner.indexOf(":") + 1);
-
-                console.log(`Search parameters: \nNAME = ${name} \nOWNER = ${owner}`);
-                if (!name) return null;
-
-                albumData = await this.spotifyService.getAlbum(name, owner);
-            }
-        } else {
-            const searchKeywords = songArgs.join(" ");
-            albumData = await this.spotifyService.getAlbum(searchKeywords);
-        }
-        
+    private async fetchAlbum(songArgs: string[]) {
+        const albumData = await this.spotifyService.getAlbumByArguments(songArgs);
         if (albumData) {
-            const songs: ISong[] = await Promise.all(albumData.songs.map(async songData => {
-                const searchKeywords = `${songData.title} ${songData.artists?.join(" ")}`;
-                console.log(`Searchterms for playlist: ${searchKeywords}`)
-                const song = await this.youtubeService.getSongBySearch(searchKeywords);
-                if (song) songData.url = song.url;
-                await this.delay(300);
-                return songData;
-            }));
-            album = {
-                name: albumData.name,
-                songs: songs
-            }
+            return await this.youtubeService.getSongsAsPlaylist(albumData.songs, albumData.name);
         }
-        console.log(album);
-        return album;
-    }
-
-    private delay(timeMs: number, value?: any) {
-        return new Promise(function(resolve) {
-            setTimeout(function() {
-                resolve(value);
-            }, timeMs);
-        });
+        return null;
     }
 
     private async handleSong(textChannel: any, guild: Guild, queue: Map<string, IQueue>, voiceChannel: VoiceChannel, song: ISong) {
@@ -342,34 +230,41 @@ export class PlayCommand extends AbstractCommand {
         if (song.url) {
             try {
                 const audioStream = await this.youtubeService.getAudioStream(song.url);
+                if (audioStream) {
+                    const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
+                    if (resource) {
+                        serverQueue.songs[0].playing = true;
+                        serverQueue.audioPlayer.play(resource);
+                        serverQueue.audioPlayer.on('error', error => {
+                            console.error("ERROR OCCURED on audio play");
+                            console.error(error);
+                            this.leaveChannel(serverQueue, queue, guild.id);
+                            return;
+                        });
+                        serverQueue.audioPlayer.on(AudioPlayerStatus.Playing, () => {
+                            console.log('The audio player has started playing!');
+                            console.log(serverQueue.songs.find(song => song.playing));
+                        });
+                        serverQueue.audioPlayer.on(AudioPlayerStatus.Idle, () => this.songFinishHandler(guild, serverQueue, queue));
+                        serverQueue.connection.subscribe(serverQueue.audioPlayer);
 
-                const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
-                if (resource) {
-                    serverQueue.songs[0].playing = true;
-                    serverQueue.audioPlayer.play(resource);
-                    serverQueue.audioPlayer.on('error', error => {
-                        console.error("ERROR OCCURED on audio play");
-                        console.error(error);
+                        serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
+                    } else {
+                        serverQueue.textChannel.send(`Got no audioo resource from YTDL API: **${song.title}**\n ${song.url}`);
                         this.leaveChannel(serverQueue, queue, guild.id);
-                        return;
-                    });
-                    serverQueue.audioPlayer.on(AudioPlayerStatus.Playing, () => {
-                        console.log('The audio player has started playing!');
-                        console.log(serverQueue.songs.find(song => song.playing));
-                    });
-                    serverQueue.audioPlayer.on(AudioPlayerStatus.Idle, () => this.songFinishHandler(guild, serverQueue, queue));
-                    serverQueue.connection.subscribe(serverQueue.audioPlayer);
-
-                    serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
+                    }
                 } else {
-                    serverQueue.textChannel.send(`Got no audioo resource from YTDL API: **${song.title}**\n ${song.url}`);
+                    serverQueue.textChannel.send(`Could not extract audio stream for: **${song.title}**`);
+                    this.leaveChannel(serverQueue, queue, guild.id);
                 }
             } catch (err) {
                 console.log(err);
                 serverQueue.textChannel.send(`An error occured: \n${err}`);
+                this.leaveChannel(serverQueue, queue, guild.id);
             }
         } else {
             serverQueue.textChannel.send(`No track URL available for: **${song.title}**`);
+            this.leaveChannel(serverQueue, queue, guild.id);
         }
     }
 
@@ -378,11 +273,15 @@ export class PlayCommand extends AbstractCommand {
         if (currentlyPlayingIndex > -1) {
             serverQueue.songs.splice(currentlyPlayingIndex, 1);
         }
-
-        serverQueue.songs.forEach(song => song.playing = false);
         if (serverQueue.songs.length > 0) {
-            serverQueue.songs[0].playing = true;
+            serverQueue.songs.forEach(song => song.playing = false);
 
+            let nextTrackIndex = 0;
+            if (currentlyPlayingIndex > -1) {
+                nextTrackIndex = currentlyPlayingIndex;
+            }
+
+            serverQueue.songs[nextTrackIndex].playing = true;
             const nextTrack: ISong = serverQueue.songs[0];
 
             if (!nextTrack) {
@@ -391,20 +290,26 @@ export class PlayCommand extends AbstractCommand {
             } else {
                 if (nextTrack.url) {
                     const audioStream = await this.youtubeService.getAudioStream(nextTrack.url);
-                    const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
-                    serverQueue.audioPlayer.play(resource);
-                    
-                    const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist({ name: "Current Queue", songs: serverQueue.songs });
-                    serverQueue.textChannel.send({embeds: [playlistEmbedMsg]});
-                    serverQueue.textChannel.send(`Start playing: **${nextTrack.title}**\n ${nextTrack.url}`);
+                    if (audioStream) {
+                        const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
+                        serverQueue.audioPlayer.play(resource);
+                        
+                        const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist({ name: "Current Queue", songs: serverQueue.songs });
+                        serverQueue.textChannel.send({embeds: [playlistEmbedMsg]});
+                        serverQueue.textChannel.send(`Start playing: **${nextTrack.title}**\n ${nextTrack.url}`);
+                    } else {
+                        serverQueue.textChannel.send(`Could not extract audio stream for: **${nextTrack.title}**`);
+                        this.songFinishHandler(guild, serverQueue, queue);
+                    }
                 } else {
                     serverQueue.textChannel.send(`No track URL available for: **${nextTrack.title}**`);
+                    this.songFinishHandler(guild, serverQueue, queue);
                 }
             }
         } else {
             this.leaveChannel(serverQueue, queue, guild.id);
             return;
-        }
+        }        
     }
 
 

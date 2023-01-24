@@ -38,6 +38,94 @@ export class SpotifyService {
         }
     }
 
+    public async getPlaylistByArguments(songArgs: string[]) {
+        try {
+            const queryArgs = songArgs.filter(arg => arg.includes("name:") || arg.includes("owner:") || arg.includes("id:"));
+            if (queryArgs.length > 0) {
+                if (queryArgs.length === 1) {
+                    const idQueryParamIndex = songArgs.findIndex(arg => arg.includes("id:"));
+                    const idArg = songArgs.slice(idQueryParamIndex);
+
+                    let id = idArg.join(" ");
+                    id = id.substr(id.indexOf(":") + 1);
+
+                    console.log(`Search parameters: \nID = ${id}`);
+                    if (!id) return null;
+
+                    return await this.getPlaylistById(id);
+                } else if (queryArgs.length === 2) {
+                    const nameQueryParamIndex = songArgs.findIndex(arg => arg.includes("name:"));
+                    const ownerQueryParamIndex = songArgs.findIndex(arg => arg.includes("owner:"));
+                    const nameArgs = songArgs.slice(nameQueryParamIndex, ownerQueryParamIndex);
+                    const ownerArgs = songArgs.slice(ownerQueryParamIndex);
+
+                    let name = nameArgs.join(" ");
+                    name = name.substr(name.indexOf(":") + 1);
+
+                    let owner = ownerArgs.join(" ");
+                    console.log(owner);
+                    owner = owner.substr(owner.indexOf(":") + 1);
+
+                    console.log(`Search parameters: \nNAME = ${name} \nOWNER = ${owner}`);
+                    if (!name) return null;
+
+                    return await this.getPlaylist(name, owner);
+                }
+            } else {
+                const searchKeywords = songArgs.join(" ");
+                return await this.getPlaylist(searchKeywords);
+            }
+        } catch (e: any) {
+            console.log(e);
+            console.log(e.message);
+        }
+        return null;
+    }
+
+    public async getAlbumByArguments(songArgs: string[]) {
+        try {
+            const queryArgs = songArgs.filter(arg => arg.includes("name:") || arg.includes("owner:") || arg.includes("id:"));
+            if (queryArgs.length > 0) {
+                if (queryArgs.length === 1) {
+                    const idQueryParamIndex = songArgs.findIndex(arg => arg.includes("id:"));
+                    const idArg = songArgs.slice(idQueryParamIndex);
+
+                    let id = idArg.join(" ");
+                    id = id.substr(id.indexOf(":") + 1);
+
+                    console.log(`Search parameters: \nID = ${id}`);
+                    if (!id) return null;
+
+                    return await this.getAlbumById(id);
+                } else if (queryArgs.length === 2) {
+                    const nameQueryParamIndex = songArgs.findIndex(arg => arg.includes("name:"));
+                    const ownerQueryParamIndex = songArgs.findIndex(arg => arg.includes("owner:"));
+                    const nameArgs = songArgs.slice(nameQueryParamIndex, ownerQueryParamIndex);
+                    const ownerArgs = songArgs.slice(ownerQueryParamIndex);
+
+                    let name = nameArgs.join(" ");
+                    name = name.substr(name.indexOf(":") + 1);
+
+                    let owner = ownerArgs.join(" ");
+                    console.log(owner);
+                    owner = owner.substr(owner.indexOf(":") + 1);
+
+                    console.log(`Search parameters: \nNAME = ${name} \nOWNER = ${owner}`);
+                    if (!name) return null;
+
+                    return await this.getAlbum(name, owner);
+                }
+            } else {
+                const searchKeywords = songArgs.join(" ");
+                return await this.getAlbum(searchKeywords);
+            }
+        } catch (e: any) {
+            console.log(e);
+            console.log(e.message);
+        }
+        return null;
+    }
+
     public async getPlaylist(searchTerm: string, owner?: string) {
         try {
             let playlistData;
@@ -90,7 +178,6 @@ export class SpotifyService {
         try {
             while (offsetPage > -1 && offsetPage < 20) {
                 const playlistData = await this.spotifyApi.searchPlaylists(searchTerm, { limit: 50, offset: offsetPage });
-                console.log(playlistData.body);
                 if (playlistData.body.playlists) {
                     const playlistMatch = playlistData.body.playlists.items.find((playlist: any) => {
                         const displayName = playlist.owner.display_name;
@@ -125,7 +212,6 @@ export class SpotifyService {
                 console.log('Something went wrong!', err);
             }
         }
-        
         return null;
     }
 
