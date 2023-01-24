@@ -165,7 +165,7 @@ export class PlayCommand extends AbstractCommand {
                 return textChannel.send(err);
             }
         } else {
-            if (!song || !!song.url) return;
+            if (!song || !song.url) return;
             serverQueue.songs.push(song);
             return textChannel.send(`Added to the queue: **${song.title}**`);
         }
