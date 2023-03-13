@@ -1,4 +1,4 @@
-import { Client, Guild, Message, MessageEmbed, VoiceChannel } from "discord.js";
+import { ChannelType, Client, Guild, Message, EmbedBuilder, VoiceBasedChannel } from "discord.js";
 import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayer, VoiceConnection, AudioResource, AudioPlayerStatus, demuxProbe } from "@discordjs/voice";
 const { TextChannel } = require('discord.js');
 import { Command } from "../Command";
@@ -42,13 +42,13 @@ export class PlayCommand extends AbstractCommand {
     }
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
-        if (message.channel.type === 'GUILD_TEXT') {
-            const voiceChannel: VoiceChannel = message.member?.voice.channel as VoiceChannel;
+        if (message.channel.type === ChannelType.GuildText) {
+            const voiceChannel = message.member?.voice.channel //message.member?.voice.channel as VoiceChannel;
             const textChannel: typeof TextChannel = message.channel;
             /* Check permissions */
             if (!voiceChannel) return textChannel.send("You need to be in a voice channel to play music!");
     
-            if (!this.hasPermissions(message, voiceChannel)) {
+            if (!await this.hasPermissions(message)) {
                 return textChannel.send(
                     "I need the permissions to join and speak in your voice channel! These are the terms if you need me as a private DJ..."
                 );
@@ -126,7 +126,7 @@ export class PlayCommand extends AbstractCommand {
         return null;
     }
 
-    private async handleSong(textChannel: any, guild: Guild, queue: Map<string, IQueue>, voiceChannel: VoiceChannel, song: ISong) {
+    private async handleSong(textChannel: any, guild: Guild, queue: Map<string, IQueue>, voiceChannel: VoiceBasedChannel, song: ISong) {
         const serverQueue = queue.get(guild.id);
         console.log(song);
         if (!serverQueue) {
@@ -176,7 +176,7 @@ export class PlayCommand extends AbstractCommand {
         }
     }
 
-    private async handlePlaylist(textChannel: any, guild: Guild, queue: Map<string, IQueue>, voiceChannel: VoiceChannel, playlist: IPlaylist) {
+    private async handlePlaylist(textChannel: any, guild: Guild, queue: Map<string, IQueue>, voiceChannel: VoiceBasedChannel, playlist: IPlaylist) {
 
         if (playlist.songs.length < 1) return;
 
@@ -208,7 +208,7 @@ export class PlayCommand extends AbstractCommand {
 
                 queue.set(guild.id, queueContract);
 
-                const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist(playlist);
+                const playlistEmbedMsg: EmbedBuilder = DiscordUtils.constructEmbedPlaylist(playlist);
                 textChannel.send({embeds: [playlistEmbedMsg]});
                 
                 // Calling the play function to start a song
@@ -228,7 +228,7 @@ export class PlayCommand extends AbstractCommand {
                 return;
             } 
 
-            const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist(playlist);
+            const playlistEmbedMsg: EmbedBuilder = DiscordUtils.constructEmbedPlaylist(playlist);
             textChannel.send({embeds: [playlistEmbedMsg]});
             
             // Calling the play function to start a song
@@ -265,6 +265,7 @@ export class PlayCommand extends AbstractCommand {
                             console.log(serverQueue.songs.find(song => song.playing));
                         });
                         serverQueue.audioPlayer.on(AudioPlayerStatus.Idle, () => this.songFinishHandler(guild, serverQueue, queue));
+
                         serverQueue.connection.subscribe(serverQueue.audioPlayer);
 
                         serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
@@ -313,7 +314,7 @@ export class PlayCommand extends AbstractCommand {
                         const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
                         serverQueue.audioPlayer.play(resource);
                         
-                        const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist({ name: "Current Queue", songs: serverQueue.songs });
+                        const playlistEmbedMsg: EmbedBuilder = DiscordUtils.constructEmbedPlaylist({ name: "Current Queue", songs: serverQueue.songs });
                         serverQueue.textChannel.send({embeds: [playlistEmbedMsg]});
                         serverQueue.textChannel.send(`Start playing: **${nextTrack.title}**\n ${nextTrack.url}`);
                     } else {

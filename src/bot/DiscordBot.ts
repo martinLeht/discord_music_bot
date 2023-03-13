@@ -25,7 +25,7 @@ export class DiscordBot {
     }
 
     public listen(): Promise <string> {
-        this.client.on('messageCreate', async (message: Message) => {
+        this.client.on('messageCreate', async (message) => {
             if (message.content.startsWith('!join') && message.member?.voice.channel && message.guild) {
                 joinVoiceChannel({
                     channelId: message.member.voice.channel.id,

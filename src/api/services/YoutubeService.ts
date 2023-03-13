@@ -2,7 +2,7 @@ import { AudioResource, createAudioResource, demuxProbe } from "@discordjs/voice
 import { injectable } from "inversify";
 import ytdl from "ytdl-core";
 //import { exec as ytdlExec } from 'youtube-dl-exec';
-import { stream, YouTubeStream } from 'play-dl';
+import { search, stream, stream_from_info, video_info, YouTubeStream } from 'play-dl';
 import { ISong } from "../models/ISong";
 import { IPlaylist } from "../models/IPlaylist";
 const ytsr = require('ytsr');
@@ -23,17 +23,25 @@ export class YoutubeService {
 
     public async getSongBySearch(searchTerm: string): Promise<ISong | null> {
         try {
-            const songInfo = await ytsr(searchTerm, { pages: 1 });
+            const songInfo = await search(searchTerm, {limit: 1})//await ytsr(searchTerm, { pages: 1 });
             /* Debug purposes
             const info = await ytdl.getInfo(songInfo.items[0].url);
             console.log(info);
             */
+           /*
             if (songInfo && songInfo.items[0]) {
                 return {
                     title: songInfo.items[0].title,
                     url: songInfo.items[0].url
                 };
             }
+            */
+           if (songInfo && songInfo[0]) {
+            return {
+                title: songInfo[0].title,
+                url: songInfo[0].url
+            };
+        }
         } catch (e: any) {
             console.log(e);
             console.log(e.message);
@@ -60,6 +68,10 @@ export class YoutubeService {
     public async getAudioStream(songUrl: string): Promise<YouTubeStream | null> {
         try {
             //const audioStream = await ytdl(songUrl, { quality: 'highestaudio', filter: 'audioonly' });
+            /*
+            const songInfo = await video_info(songUrl)
+            const audioStream = await stream_from_info(songInfo, { discordPlayerCompatibility: true });
+            */
             const audioStream = await stream(songUrl, { discordPlayerCompatibility: true });
             return audioStream;
         } catch (e: any) {

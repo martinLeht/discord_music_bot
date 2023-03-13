@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { Container } from "inversify";
 import { TYPES } from "./types";
 import { DiscordBot } from "../bot/DiscordBot";
-import { Client, Intents } from "discord.js";
+import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { YoutubeService } from "../api/services/YoutubeService";
 import { PlayCommand } from "../command/play/PlayCommand";
 import { SkipCommand } from "../command/skip/SkipCommand";
@@ -16,11 +16,12 @@ import { QueueCommand } from "../command/queue/QueueCommand";
 let container = new Container();
 const client = new Client({ 
     intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.DIRECT_MESSAGES,
-        Intents.FLAGS.GUILD_VOICE_STATES
-    ], partials: ["CHANNEL"] });
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.MessageContent
+    ], partials: [Partials.Channel] });
 
 container.bind<DiscordBot>(TYPES.Bot).to(DiscordBot).inSingletonScope();
 container.bind<Client>(TYPES.Client).toConstantValue(client);

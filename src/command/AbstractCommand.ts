@@ -1,4 +1,4 @@
-import { Message, VoiceChannel, Permissions } from "discord.js";
+import { Message, Permissions, PermissionsBitField } from "discord.js";
 const { TextChannel } = require('discord.js');
 import { IQueue } from "./models/IQueue";
 import { Command } from "./Command";
@@ -21,11 +21,11 @@ export abstract class AbstractCommand implements ICommand {
         return voiceChannel !== undefined && voiceChannel !== null;
     }
 
-    public hasPermissions(message: Message, voiceChannel: VoiceChannel): boolean {
+    public async hasPermissions(message: Message): Promise<boolean> {
         if (!message.client.user) return false;
-        const permissions = voiceChannel.permissionsFor(message.client.user);
+        const permissions = await message.client.user.fetchFlags();
 
-        if (!permissions?.has([Permissions.FLAGS.CONNECT]) || !permissions.has([Permissions.FLAGS.SPEAK])) {
+        if (!message.member?.permissions.has(PermissionsBitField.Flags.Connect) || !message.member?.permissions.has(PermissionsBitField.Flags.Speak)) {
             return false;
         }
         return true;

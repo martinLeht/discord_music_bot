@@ -1,4 +1,4 @@
-import { Guild, Message } from "discord.js";
+import { ChannelType, Guild, Message } from "discord.js";
 const { TextChannel } = require('discord.js');
 import { IQueue } from "../models/IQueue";
 import { AbstractCommand } from "../AbstractCommand";
@@ -11,7 +11,7 @@ export class StopCommand extends AbstractCommand {
     public readonly name: Command = Command.stop;
 
     public async execute(message: Message, _args: string[], queue: Map<string, IQueue>): Promise<any> {
-        if (message.channel.type === 'GUILD_TEXT') {
+        if (message.channel.type === ChannelType.GuildText) {
             const textChannel: typeof TextChannel = message.channel;
             if (!this.isMemberInVoiceChannel(message)) {
                 return textChannel.send(

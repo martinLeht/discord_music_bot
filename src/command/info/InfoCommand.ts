@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from "discord.js";
+import { Message, EmbedBuilder, ChannelType } from "discord.js";
 const { TextChannel } = require('discord.js');
 import { IQueue } from "../models/IQueue";
 import { AbstractCommand } from "../AbstractCommand";
@@ -10,14 +10,14 @@ export class InfoCommand extends AbstractCommand {
     public readonly name: Command = Command.info;
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
-        if (message.channel.type === 'GUILD_TEXT') {
+        if (message.channel.type === ChannelType.GuildText) {
             const textChannel: typeof TextChannel = message.channel;
             if (!this.isMemberInVoiceChannel(message)) {
                 return textChannel.send(
                     "You have to be in a voice channel to stop the music!"
                 );
             }
-            const infoMsg: MessageEmbed = this.constructEmbedInfo();
+            const infoMsg: EmbedBuilder = this.constructEmbedInfo();
 
             return textChannel.send({ embeds: [infoMsg] });
         } else {
@@ -25,8 +25,8 @@ export class InfoCommand extends AbstractCommand {
         }
     }
 
-    private constructEmbedInfo(): MessageEmbed {
-        const infoMessage: MessageEmbed = new MessageEmbed()
+    private constructEmbedInfo(): EmbedBuilder {
+        const infoMessage: EmbedBuilder = new EmbedBuilder()
             .setColor('#0099ff')
             .setTitle('Dj Nippon by Nippon Squad')
             .setThumbnail('https://wallpaperaccess.com/full/2840971.jpg')

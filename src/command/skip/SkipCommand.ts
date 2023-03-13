@@ -1,4 +1,4 @@
-import { Guild, Message, MessageEmbed } from "discord.js";
+import { Guild, Message, EmbedBuilder, ChannelType } from "discord.js";
 const { TextChannel } = require('discord.js');
 import { IQueue } from "../models/IQueue";
 import { AbstractCommand } from "../AbstractCommand";
@@ -31,7 +31,7 @@ export class SkipCommand extends AbstractCommand {
     }
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
-        if (message.channel.type === 'GUILD_TEXT') {
+        if (message.channel.type === ChannelType.GuildText) {
             const textChannel: typeof TextChannel = message.channel;
             if (!this.isMemberInVoiceChannel(message)) {
                 return textChannel.send(
@@ -106,7 +106,7 @@ export class SkipCommand extends AbstractCommand {
                         const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
                         serverQueue.audioPlayer.play(resource);
                         
-                        const playlistEmbedMsg: MessageEmbed = DiscordUtils.constructEmbedPlaylist({ name: "Current Queue", songs: serverQueue.songs });
+                        const playlistEmbedMsg: EmbedBuilder = DiscordUtils.constructEmbedPlaylist({ name: "Current Queue", songs: serverQueue.songs });
                         serverQueue.textChannel.send({embeds: [playlistEmbedMsg]});
                         serverQueue.textChannel.send(`Start playing: **${nextTrack.title}**\n ${nextTrack.url}`);
                     } else {
