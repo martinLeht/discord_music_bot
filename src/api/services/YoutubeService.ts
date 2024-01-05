@@ -1,8 +1,6 @@
-import { AudioResource, createAudioResource, demuxProbe } from "@discordjs/voice";
 import { injectable } from "inversify";
 import ytdl from "ytdl-core";
-//import { exec as ytdlExec } from 'youtube-dl-exec';
-import { search, stream, stream_from_info, video_info, YouTubeStream } from 'play-dl';
+import { search, stream, YouTubeStream } from 'play-dl';
 import { ISong } from "../models/ISong";
 import { IPlaylist } from "../models/IPlaylist";
 const ytsr = require('ytsr');
@@ -67,11 +65,6 @@ export class YoutubeService {
 
     public async getAudioStream(songUrl: string): Promise<YouTubeStream | null> {
         try {
-            //const audioStream = await ytdl(songUrl, { quality: 'highestaudio', filter: 'audioonly' });
-            /*
-            const songInfo = await video_info(songUrl)
-            const audioStream = await stream_from_info(songInfo, { discordPlayerCompatibility: true });
-            */
             const audioStream = await stream(songUrl, { discordPlayerCompatibility: true });
             return audioStream;
         } catch (e: any) {

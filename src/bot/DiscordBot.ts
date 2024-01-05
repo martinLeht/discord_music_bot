@@ -1,5 +1,5 @@
 import { Client, Message } from "discord.js";
-import { joinVoiceChannel } from "@discordjs/voice";
+import { getVoiceConnection, joinVoiceChannel } from "@discordjs/voice";
 import { inject, injectable } from "inversify";
 import { CommandFactory } from '../command/CommandFactory';
 import { TOKEN, PREFIX } from "../config/config";
@@ -48,6 +48,10 @@ export class DiscordBot {
                 } catch (err) {
                     console.log('Something went wrong...\n' + err);
                     await message.reply('Something went wrong...\n' + err);
+                    if (message.guild) {
+                        const conn = getVoiceConnection(message.guild.id);
+                        if (conn) conn.destroy();
+                    }
                 }
             }
         });

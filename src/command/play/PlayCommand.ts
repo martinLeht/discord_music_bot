@@ -1,5 +1,5 @@
 import { ChannelType, Client, Guild, Message, EmbedBuilder, VoiceBasedChannel } from "discord.js";
-import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayer, VoiceConnection, AudioResource, AudioPlayerStatus, demuxProbe } from "@discordjs/voice";
+import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } from "@discordjs/voice";
 const { TextChannel } = require('discord.js');
 import { Command } from "../Command";
 import { AbstractCommand } from "../AbstractCommand";
@@ -26,24 +26,21 @@ export class PlayCommand extends AbstractCommand {
         Option.spotifyAlbum
     ];
 
-    private client: Client;
     private youtubeService: YoutubeService;
     private spotifyService: SpotifyService;
 
     constructor(
-        @inject(TYPES.Client) client: Client,
         @inject(TYPES.YoutubeService) youtubeService: YoutubeService,
         @inject(TYPES.SpotifyService) spotifyService: SpotifyService
     ) {
         super();
-        this.client = client;
         this.youtubeService = youtubeService;
         this.spotifyService = spotifyService;
     }
 
     public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
         if (message.channel.type === ChannelType.GuildText) {
-            const voiceChannel = message.member?.voice.channel //message.member?.voice.channel as VoiceChannel;
+            const voiceChannel = message.member?.voice.channel;
             const textChannel: typeof TextChannel = message.channel;
             /* Check permissions */
             if (!voiceChannel) return textChannel.send("You need to be in a voice channel to play music!");
@@ -80,7 +77,6 @@ export class PlayCommand extends AbstractCommand {
                     if (!album || album.songs.length < 1) {
                         return textChannel.send(`No album found with arguments:  **${args.join(" ")}**`); 
                     }
-
                     return this.handlePlaylist(textChannel, guild, queue, voiceChannel, album);
                 }
             } else {
