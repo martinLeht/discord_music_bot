@@ -4,6 +4,7 @@ import { IQueue } from "../models/IQueue";
 import { AbstractCommand } from "../AbstractCommand";
 import { Command } from "../Command";
 import { injectable } from "inversify";
+import { VoiceConnection, getVoiceConnection } from "@discordjs/voice";
 
 @injectable()
 export class StopCommand extends AbstractCommand {
@@ -23,24 +24,27 @@ export class StopCommand extends AbstractCommand {
 
             const guild: Guild = message.guild;
             const serverQueue = queue.get(guild.id);
-            if (!serverQueue){
+            if (!serverQueue) {
+                const conn = getVoiceConnection(message.guild.id);
+                if (conn) conn.destroy();
                 return textChannel.send("There is no song that I could stop!");
             }
 
             if (!serverQueue.connection) {
-                this.leaveChannel(serverQueue, queue, guild.id);
+                this.leaveChannel(serverQueue.connection, queue, guild.id);
                 return textChannel.send("Something went wrong on song dispatching...");
             }
 
             serverQueue.songs = [];
             serverQueue.audioPlayer.stop();
+            this.leaveChannel(serverQueue.connection, queue, guild.id);
         } else {
             return;
         }
     }
 
-    private leaveChannel(serverQueue: IQueue, queue: Map<string, IQueue>, guildId: string) {
-        serverQueue.connection.destroy();
+    private leaveChannel(connection: VoiceConnection, queue: Map<string, IQueue>, guildId: string) {
+        connection.destroy();
         queue.delete(guildId);
     }
 }

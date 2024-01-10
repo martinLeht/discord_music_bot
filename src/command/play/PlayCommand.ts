@@ -1,4 +1,4 @@
-import { ChannelType, Client, Guild, Message, EmbedBuilder, VoiceBasedChannel } from "discord.js";
+import { ChannelType, Guild, Message, EmbedBuilder, VoiceBasedChannel } from "discord.js";
 import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } from "@discordjs/voice";
 const { TextChannel } = require('discord.js');
 import { Command } from "../Command";
@@ -306,6 +306,7 @@ export class PlayCommand extends AbstractCommand {
             } else {
                 if (nextTrack.url) {
                     const audioStream = await this.youtubeService.getAudioStream(nextTrack.url);
+                    //const audioStream = await this.youtubeService.getAudioStreamReadable(nextTrack.url);
                     if (audioStream) {
                         const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
                         serverQueue.audioPlayer.play(resource);

@@ -1,4 +1,4 @@
-import { Client, Message } from "discord.js";
+import { Client } from "discord.js";
 import { getVoiceConnection, joinVoiceChannel } from "@discordjs/voice";
 import { inject, injectable } from "inversify";
 import { CommandFactory } from '../command/CommandFactory';
@@ -71,7 +71,6 @@ export class DiscordBot {
         this.client.on('error', (err: Error) => {
             console.log(err);
         });
-        
         return this.client.login(this.token);
     }
 

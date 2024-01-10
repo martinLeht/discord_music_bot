@@ -35,11 +35,11 @@ export class YoutubeService {
             }
             */
            if (songInfo && songInfo[0]) {
-            return {
-                title: songInfo[0].title,
-                url: songInfo[0].url
-            };
-        }
+                return {
+                    title: songInfo[0].title,
+                    url: songInfo[0].url
+                };
+            }
         } catch (e: any) {
             console.log(e);
             console.log(e.message);
@@ -65,8 +65,7 @@ export class YoutubeService {
 
     public async getAudioStream(songUrl: string): Promise<YouTubeStream | null> {
         try {
-            const audioStream = await stream(songUrl, { discordPlayerCompatibility: true });
-            return audioStream;
+            return await stream(songUrl, { discordPlayerCompatibility: true });
         } catch (e: any) {
             console.log(e);
             console.log(e.message);
@@ -108,53 +107,4 @@ export class YoutubeService {
             }, timeMs);
         });
     }
-
-    /*
-    public getAudioResource(url: string, callbackFunc?: (audioResource: AudioResource) => void): Promise<AudioResource<any> | null> {
-        return new Promise((resolve, reject) => {
-            console.log("Executing YTDL process");
-            const ytdlProcess = ytdlExec(
-                url,
-                {
-                    output: '-',
-                    quiet: false,
-                    format: 'bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio',
-                    limitRate: '100K',
-                },
-                { stdio: ['ignore', 'pipe', 'ignore'] },
-            );
-            if (!ytdlProcess.stdout) {
-                reject(new Error('No stdout'));
-				return;
-            }
-            const stream = ytdlProcess.stdout;
-    
-            try {
-                ytdlProcess
-                    .once('spawn', async () => {
-                        const probeInfo = await demuxProbe(stream);
-                        console.log("Demux probe:");
-                        console.log(probeInfo);
-                        if (probeInfo) {
-                            const audioResource = createAudioResource(probeInfo.stream, { inputType: probeInfo.type });
-                            console.log(audioResource);
-                            console.log(callbackFunc);
-                            if (callbackFunc) callbackFunc(audioResource);
-                            resolve(audioResource);
-                        }
-                        resolve(null);
-                    });
-            } catch (err) {
-                console.log("Error on audiostream creation:");
-                console.log(err);
-                if (!ytdlProcess.killed) ytdlProcess.kill();
-                stream.resume();
-                reject(err);
-            }
-
-        });
-        
-        
-	}
-*/
 }
