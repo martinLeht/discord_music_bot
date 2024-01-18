@@ -4,7 +4,7 @@
   "description": "Music bot for discord (because Groovy support is stopped...)",
   "main": "dist/server.js",
   "scripts": {
-    "build": "rimraf dist && tsc && mkdir distt/resources && cp srct/resourcest/DJ_Khaled_2.mp3 distt/resourcest/",
+    "build": "rimraf dist && tsc && mkdir dist/resources && cp src/resources/DJ_Khaled_2.mp3 dist/resources/",
     "preserve": "npm run build",
     "serve": "cross-env NODE_ENV=development concurrently \"tsc --watch\" \"nodemon -q dist/server.js\"",
     "prestart": "npm run build",
