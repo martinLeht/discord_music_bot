@@ -13,6 +13,7 @@ import { TYPES } from "../../config/types";
 import { SpotifyService } from "../../api/services/SpotifyService";
 import { IPlaylist } from "../../api/models/IPlaylist";
 import { DiscordUtils } from "../../utils/DiscordUtils";
+import { join } from "path";
 
 @injectable()
 export class PlayCommand extends AbstractCommand {
@@ -28,6 +29,8 @@ export class PlayCommand extends AbstractCommand {
 
     private youtubeService: YoutubeService;
     private spotifyService: SpotifyService;
+
+    private readonly joinAudioResourcePath: string = join(__dirname, '..', '..', 'resources', 'DJ_Khaled_2.mp3');
 
     constructor(
         @inject(TYPES.YoutubeService) youtubeService: YoutubeService,
@@ -134,6 +137,7 @@ export class PlayCommand extends AbstractCommand {
                     adapterCreator: guild.voiceAdapterCreator
                 });
                 const audioPlayer = createAudioPlayer()
+
                 const queueContract: IQueue = {
                     textChannel: textChannel,
                     voiceChannel: voiceChannel,
@@ -153,9 +157,18 @@ export class PlayCommand extends AbstractCommand {
                 queueContract.songs.push(song);
                 queue.set(guild.id, queueContract);
 
+                try {
+                    const resource = createAudioResource(this.joinAudioResourcePath);
+                    if (!!resource) {
+                        queueContract.audioPlayer.play(resource);
+                        queueContract.connection.subscribe(audioPlayer)
+                    }
+                } catch(err) {
+                    console.error(err)
+                }
 
-                // Calling the play function to start a song
-                await this.play(guild, queueContract.songs[0], queue);
+                queueContract.audioPlayer.on(AudioPlayerStatus.Idle, async () => await this.play(guild, queueContract.songs[0], queue));
+                
             } catch (err: any) {
                 // Printing the error message if the bot fails to join the voicechat
                 console.log(err);
@@ -306,7 +319,6 @@ export class PlayCommand extends AbstractCommand {
             } else {
                 if (nextTrack.url) {
                     const audioStream = await this.youtubeService.getAudioStream(nextTrack.url);
-                    //const audioStream = await this.youtubeService.getAudioStreamReadable(nextTrack.url);
                     if (audioStream) {
                         const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
                         serverQueue.audioPlayer.play(resource);
