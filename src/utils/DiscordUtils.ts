@@ -7,7 +7,7 @@ export class DiscordUtils {
     public static constructEmbedPlaylist(playlist: IPlaylist): EmbedBuilder {
 
         const playlistContent = playlist.songs.map((song, i) => {
-            if (song.playing) return `* ${i + 1}. **${song.title}**`
+            if (!!song.playing) return `* ${i + 1}. **${song.title}**`
             return `${i + 1}. **${song.title}**`
         })
 

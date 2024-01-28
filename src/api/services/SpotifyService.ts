@@ -84,37 +84,18 @@ export class SpotifyService {
 
     public async getAlbumByArguments(songArgs: string[]) {
         try {
-            const queryArgs = songArgs.filter(arg => arg.includes("name:") || arg.includes("owner:") || arg.includes("id:"));
-            if (queryArgs.length > 0) {
-                if (queryArgs.length === 1) {
-                    const idQueryParamIndex = songArgs.findIndex(arg => arg.includes("id:"));
-                    const idArg = songArgs.slice(idQueryParamIndex);
+            const queryArgs = songArgs.filter(arg => arg.includes("id:"));
+            if (queryArgs.length > 0 && queryArgs.length === 1) {
+                const idQueryParamIndex = songArgs.findIndex(arg => arg.includes("id:"));
+                const idArg = songArgs.slice(idQueryParamIndex);
 
-                    let id = idArg.join(" ");
-                    id = id.substring(id.indexOf(":") + 1);
+                let id = idArg.join(" ");
+                id = id.substring(id.indexOf(":") + 1);
 
-                    console.log(`Search parameters: \nID = ${id}`);
-                    if (!id) return null;
+                console.log(`Search parameters: \nID = ${id}`);
+                if (!id) return null;
 
-                    return await this.getAlbumById(id);
-                } else if (queryArgs.length === 2) {
-                    const nameQueryParamIndex = songArgs.findIndex(arg => arg.includes("name:"));
-                    const ownerQueryParamIndex = songArgs.findIndex(arg => arg.includes("owner:"));
-                    const nameArgs = songArgs.slice(nameQueryParamIndex, ownerQueryParamIndex);
-                    const ownerArgs = songArgs.slice(ownerQueryParamIndex);
-
-                    let name = nameArgs.join(" ");
-                    name = name.substring(name.indexOf(":") + 1);
-
-                    let owner = ownerArgs.join(" ");
-                    console.log(owner);
-                    owner = owner.substring(owner.indexOf(":") + 1);
-
-                    console.log(`Search parameters: \nNAME = ${name} \nOWNER = ${owner}`);
-                    if (!name) return null;
-
-                    return await this.getAlbum(name, owner);
-                }
+                return await this.getAlbumById(id);
             } else {
                 const searchKeywords = songArgs.join(" ");
                 return await this.getAlbum(searchKeywords);
@@ -180,7 +161,6 @@ export class SpotifyService {
                 const playlistData = await this.spotifyApi.getUserPlaylists(ownerId, { limit: 50, offset: offsetPage });
                 if (playlistData.body) {
                     const playlistMatch = playlistData.body.items.find((playlist) => {
-                        console.log(playlist.owner);
                         return playlist.owner.id === ownerId && playlist.name.toLowerCase() === searchTerm.toLowerCase();
                     });
 
