@@ -11,40 +11,26 @@ export class StopCommand extends AbstractCommand {
 
     public readonly name: Command = Command.stop;
 
-    public async execute(message: Message, _args: string[], queue: Map<string, IQueue>): Promise<any> {
-        if (message.channel.type === ChannelType.GuildText) {
+    public async execute(message: Message, _args: string[], queue: Map<string, IQueue>) {
+        if (message.channel.type === ChannelType.GuildText && !!message.guild) {
             const textChannel: typeof TextChannel = message.channel;
             if (!this.isMemberInVoiceChannel(message)) {
-                return textChannel.send(
+                textChannel.send(
                     "You have to be in a voice channel to stop the music!"
                 );
             }
-
-            if(!message.guild) return;
 
             const guild: Guild = message.guild;
             const serverQueue = queue.get(guild.id);
             if (!serverQueue) {
                 const conn = getVoiceConnection(message.guild.id);
                 if (conn) conn.destroy();
-                return textChannel.send("There is no song that I could stop!");
+                textChannel.send("There is no song that I could stop!");
+            } else {
+                serverQueue.songs = [];
+                serverQueue.audioPlayer.stop();
+                this.leaveChannel(serverQueue, queue, guild.id);
             }
-
-            if (!serverQueue.connection) {
-                this.leaveChannel(serverQueue.connection, queue, guild.id);
-                return textChannel.send("Something went wrong on song dispatching...");
-            }
-
-            serverQueue.songs = [];
-            serverQueue.audioPlayer.stop();
-            this.leaveChannel(serverQueue.connection, queue, guild.id);
-        } else {
-            return;
         }
-    }
-
-    private leaveChannel(connection: VoiceConnection, queue: Map<string, IQueue>, guildId: string) {
-        connection.destroy();
-        queue.delete(guildId);
     }
 }

@@ -14,21 +14,22 @@ export abstract class AbstractCommand implements ICommand {
 
     public readonly options: Option[] | undefined
     
-    public abstract execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any>;
+    public abstract execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<void>;
 
     public isMemberInVoiceChannel(message: Message): boolean {
-        const voiceChannel = message.member?.voice.channel;
-        return voiceChannel !== undefined && voiceChannel !== null;
+        return !!message.member?.voice.channel;
     }
 
-    public async hasPermissions(message: Message): Promise<boolean> {
-        if (!message.client.user) return false;
-        const permissions = await message.client.user.fetchFlags();
-
+    public hasPermissions(message: Message): boolean {
         if (!message.member?.permissions.has(PermissionsBitField.Flags.Connect) || !message.member?.permissions.has(PermissionsBitField.Flags.Speak)) {
             return false;
         }
         return true;
+    }
+
+    public leaveChannel(serverQueue: IQueue, queue: Map<string, IQueue>, guildId: string) {
+        serverQueue.connection.destroy();
+        queue.delete(guildId);
     }
 
     public getOptions(textChannel: any, args: string[]): IOption[] {
@@ -40,7 +41,7 @@ export abstract class AbstractCommand implements ICommand {
                  * If so, the option is followed by "=" and the value
                  */
                 const optArg = arg.split("=");
-                const opt = this.getOption(optArg[0].substr(1));
+                const opt = this.getOption(optArg[0].substring(1));
                 if (opt !== undefined) {
                     optArgs.push({
                         name: opt,

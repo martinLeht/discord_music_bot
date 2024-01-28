@@ -47,7 +47,7 @@ export class SpotifyService {
                     const idArg = songArgs.slice(idQueryParamIndex);
 
                     let id = idArg.join(" ");
-                    id = id.substr(id.indexOf(":") + 1);
+                    id = id.substring(id.indexOf(":") + 1);
 
                     console.log(`Search parameters: \nID = ${id}`);
                     if (!id) return null;
@@ -60,11 +60,11 @@ export class SpotifyService {
                     const ownerArgs = songArgs.slice(ownerQueryParamIndex);
 
                     let name = nameArgs.join(" ");
-                    name = name.substr(name.indexOf(":") + 1);
+                    name = name.substring(name.indexOf(":") + 1);
 
                     let owner = ownerArgs.join(" ");
                     console.log(owner);
-                    owner = owner.substr(owner.indexOf(":") + 1);
+                    owner = owner.substring(owner.indexOf(":") + 1);
 
                     console.log(`Search parameters: \nNAME = ${name} \nOWNER = ${owner}`);
                     if (!name) return null;
@@ -91,7 +91,7 @@ export class SpotifyService {
                     const idArg = songArgs.slice(idQueryParamIndex);
 
                     let id = idArg.join(" ");
-                    id = id.substr(id.indexOf(":") + 1);
+                    id = id.substring(id.indexOf(":") + 1);
 
                     console.log(`Search parameters: \nID = ${id}`);
                     if (!id) return null;
@@ -104,11 +104,11 @@ export class SpotifyService {
                     const ownerArgs = songArgs.slice(ownerQueryParamIndex);
 
                     let name = nameArgs.join(" ");
-                    name = name.substr(name.indexOf(":") + 1);
+                    name = name.substring(name.indexOf(":") + 1);
 
                     let owner = ownerArgs.join(" ");
                     console.log(owner);
-                    owner = owner.substr(owner.indexOf(":") + 1);
+                    owner = owner.substring(owner.indexOf(":") + 1);
 
                     console.log(`Search parameters: \nNAME = ${name} \nOWNER = ${owner}`);
                     if (!name) return null;
@@ -173,26 +173,22 @@ export class SpotifyService {
         return null;
     }
 
-    private async searchPlaylistByOwner(searchTerm: string, owner: string) {
+    private async searchPlaylistByOwner(searchTerm: string, ownerId: string) {
         let offsetPage = 0;
         try {
             while (offsetPage > -1 && offsetPage < 20) {
-                const playlistData = await this.spotifyApi.searchPlaylists(searchTerm, { limit: 50, offset: offsetPage });
-                if (playlistData.body.playlists) {
-                    const playlistMatch = playlistData.body.playlists.items.find((playlist: any) => {
-                        const displayName = playlist.owner.display_name;
-                        if (displayName) {
-                            const displayNameLower = displayName.toLocaleLowerCase();
-                            const ownerLower = owner.toLocaleLowerCase();
-                            return displayNameLower === ownerLower
-                        }
-                        return false;
+                const playlistData = await this.spotifyApi.getUserPlaylists(ownerId, { limit: 50, offset: offsetPage });
+                if (playlistData.body) {
+                    const playlistMatch = playlistData.body.items.find((playlist) => {
+                        console.log(playlist.owner);
+                        return playlist.owner.id === ownerId && playlist.name.toLowerCase() === searchTerm.toLowerCase();
                     });
 
                     if (playlistMatch) {
                         return playlistMatch;
                     } else {
-                        if (playlistData.body.playlists.next !== null) {
+                        console.log("No match in page...");
+                        if (playlistData.body.next !== null) {
                             offsetPage++;
                             await this.delay(300);
                         } else {

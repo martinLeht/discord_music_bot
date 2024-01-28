@@ -4,7 +4,7 @@
   "description": "Music bot for discord (because Groovy support is stopped...)",
   "main": "dist/server.js",
   "scripts": {
-    "build": "rimraf dist && tsc && mkdir dist/resources && cp src/resources/DJ_Khaled_2.mp3 dist/resources/",
+    "build": "rimraf dist && tsc && mkdir dist\\resources && cp src\\resources\\DJ_Khaled_2.mp3 dist\\resources\\",
     "preserve": "npm run build",
     "serve": "cross-env NODE_ENV=development concurrently \"tsc --watch\" \"nodemon -q dist/server.js\"",
     "prestart": "npm run build",
@@ -18,25 +18,24 @@
   "dependencies": {
     "@discordjs/opus": "^0.9.0",
     "@discordjs/voice": "^0.16.1",
-    "@types/node": "^20.10.4",
+    "@types/node": "^20.11.9",
     "@types/spotify-web-api-node": "^5.0.11",
     "cross-env": "^7.0.3",
     "discord-api-types": "^0.37.66",
     "discord.js": "^14.14.1",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.4.1",
     "ffmpeg-static": "^5.2.0",
     "helmet": "^7.1.0",
     "inversify": "^6.0.2",
-    "nodemon": "^3.0.2",
+    "nodemon": "^3.0.3",
     "play-dl": "^1.9.7",
     "reflect-metadata": "^0.1.14",
     "rimraf": "^5.0.5",
-    "sodium-native": "^4.0.4",
+    "sodium-native": "^4.0.6",
     "spotify-web-api-node": "^5.0.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
-    "ytdl-core": "^4.11.5",
-    "ytsr": "^3.8.4"
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

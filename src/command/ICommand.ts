@@ -4,7 +4,8 @@ import { Command } from "./Command";
 
 export interface ICommand {
     readonly name: Command;
-    execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any>;
-    isMemberInVoiceChannel(message: Message): boolean ;
-    hasPermissions(message: Message): Promise<boolean>;
+    execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<void>;
+    isMemberInVoiceChannel(message: Message): boolean;
+    hasPermissions(message: Message): boolean;
+    leaveChannel(serverQueue: IQueue, queue: Map<string, IQueue>, guildId: string): void;
 }

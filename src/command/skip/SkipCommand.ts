@@ -30,59 +30,51 @@ export class SkipCommand extends AbstractCommand {
         this.youtubeService = youtubeService;
     }
 
-    public async execute(message: Message, args: string[], queue: Map<string, IQueue>): Promise<any> {
-        if (message.channel.type === ChannelType.GuildText) {
+    public async execute(message: Message, args: string[], queue: Map<string, IQueue>) {
+        if (message.channel.type === ChannelType.GuildText && !!message.guild) {
             const textChannel: typeof TextChannel = message.channel;
             if (!this.isMemberInVoiceChannel(message)) {
-                return textChannel.send(
+                textChannel.send(
                     "You have to be in a voice channel to skip a song!"
                 );
             }
-            
-            if(!message.guild) return;
 
             const guild: Guild = message.guild;
             const serverQueue = queue.get(guild.id);
 
-            if (!serverQueue) {
-                return textChannel.send("There is no song that I could skip!");
-            }
 
-            if (!serverQueue.connection) {
-                this.leaveChannel(serverQueue, queue, guild.id);
-                return textChannel.send("Something went wrong on song dispatching...");
-            }
-
-            // Extract options from arguments
-            const opts: IOption[] = this.getOptions(message, args);
-            const providedArgs = args.filter(arg => !this.isOptionArg(arg));
-
-            if (serverQueue.songs.length > 1) {
-                if (opts.length > 0) {
-                    if (opts[0].name === Option.to && providedArgs) {
-                        const trackIndex = Number(providedArgs);
-                        if (!isNaN(trackIndex)) {
-                            if (trackIndex > 0) this.handleSkipToSong(trackIndex - 1, guild, serverQueue, queue);
-                            else this.handleSkipToSong(trackIndex, guild, serverQueue, queue);
-                        } else {
-                            return textChannel.send("Invalid argument, provide the index of the track in the queue.\n"
-                                                    + "E.g.: **!skip -to 1**");
-                        }
-                    }
+            if (!!serverQueue) {
+                if (!serverQueue.connection) {
+                    this.leaveChannel(serverQueue, queue, guild.id);
+                    textChannel.send("Something went wrong on song dispatching...");
                 } else {
-                    serverQueue.audioPlayer.stop();
+                    // Extract options from arguments
+                    const opts: IOption[] = this.getOptions(message, args);
+                    const providedArgs = args.filter(arg => !this.isOptionArg(arg));
+
+                    if (serverQueue.songs.length > 1) {
+                        if (opts.length > 0) {
+                            if (opts[0].name === Option.to && providedArgs) {
+                                const trackIndex = Number(providedArgs);
+                                if (!isNaN(trackIndex)) {
+                                    if (trackIndex > 0) this.handleSkipToSong(trackIndex - 1, guild, serverQueue, queue);
+                                    else this.handleSkipToSong(trackIndex, guild, serverQueue, queue);
+                                } else {
+                                   textChannel.send("Invalid argument, provide the index of the track in the queue.\n"
+                                                    + "E.g.: **!skip -to 1**");
+                                }
+                            }
+                        } else {
+                            serverQueue.audioPlayer.stop();
+                        }
+                    } else {
+                        serverQueue.audioPlayer.stop();
+                    }
                 }
             } else {
-                serverQueue.audioPlayer.stop();
+                textChannel.send("There is no song that I could skip!");
             }
-        } else {
-            return;
         }
-    }
-
-    private leaveChannel(serverQueue: IQueue, queue: Map<string, IQueue>, guildId: string) {
-        serverQueue.connection.destroy();
-        queue.delete(guildId);
     }
 
     private async handleSkipToSong(trackIndex: number, guild: Guild, serverQueue: IQueue, queue: Map<string, IQueue>) {

@@ -3,7 +3,6 @@ import ytdl from "ytdl-core";
 import { search, stream, YouTubeStream } from 'play-dl';
 import { ISong } from "../models/ISong";
 import { IPlaylist } from "../models/IPlaylist";
-const ytsr = require('ytsr');
 
 @injectable()
 export class YoutubeService {
@@ -21,19 +20,7 @@ export class YoutubeService {
 
     public async getSongBySearch(searchTerm: string): Promise<ISong | null> {
         try {
-            const songInfo = await search(searchTerm, {limit: 1})//await ytsr(searchTerm, { pages: 1 });
-            /* Debug purposes
-            const info = await ytdl.getInfo(songInfo.items[0].url);
-            console.log(info);
-            */
-           /*
-            if (songInfo && songInfo.items[0]) {
-                return {
-                    title: songInfo.items[0].title,
-                    url: songInfo.items[0].url
-                };
-            }
-            */
+            const songInfo = await search(searchTerm, {limit: 1})
            if (songInfo && songInfo[0]) {
                 return {
                     title: songInfo[0].title,

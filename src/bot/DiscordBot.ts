@@ -24,7 +24,7 @@ export class DiscordBot {
         this.queue = new Map();
     }
 
-    public listen(): Promise <string> {
+    public listen() {
         this.client.on('messageCreate', async (message) => {
             if (message.content.startsWith('!join') && message.member?.voice.channel && message.guild) {
                 joinVoiceChannel({
@@ -33,24 +33,21 @@ export class DiscordBot {
                     adapterCreator: message.guild.voiceAdapterCreator
                 });
             } else {
-                if (!message.content.startsWith(PREFIX) || message.author.bot) return;
-
-                const args: string[] = message.content.slice(PREFIX.length).trim().split(' ');
-                let cmdKey = args.shift();
-                if (!cmdKey) return;
-
-                cmdKey = cmdKey.toLowerCase();
-                const cmd = this.getCommand(cmdKey); 
-                
-                if (!cmd) return;
-                try {
-                    await cmd.execute(message, args, this.queue);
-                } catch (err) {
-                    console.log('Something went wrong...\n' + err);
-                    await message.reply('Something went wrong...\n' + err);
-                    if (message.guild) {
-                        const conn = getVoiceConnection(message.guild.id);
-                        if (conn) conn.destroy();
+                if (message.content.startsWith(PREFIX) && !message.author.bot) {
+                    const args: string[] = message.content.slice(PREFIX.length).trim().split(' ');
+                    const cmd = this.getCommand(args); 
+                    
+                    if (!!cmd) {
+                        try {
+                            cmd.execute(message, args, this.queue);
+                        } catch (err) {
+                            console.log('Something went wrong...\n' + err);
+                            message.reply('Something went wrong...\n' + err);
+                            if (message.guild) {
+                                const conn = getVoiceConnection(message.guild.id);
+                                if (conn) conn.destroy();
+                            }
+                        }
                     }
                 }
             }
@@ -70,11 +67,17 @@ export class DiscordBot {
 
         this.client.on('error', (err: Error) => {
             console.log(err);
+            console.log(err.message);
         });
-        return this.client.login(this.token);
+
+        this.client.login(this.token);
     }
 
-    private getCommand(cmdKey: string): ICommand | undefined {
+    private getCommand(msgArgs: string[]): ICommand | undefined {
+        let cmdKey = msgArgs.shift();
+        if (!cmdKey) return undefined;
+
+        cmdKey = cmdKey.toLowerCase();
         const cmd: Command = Command[cmdKey as keyof typeof Command];
         return this.commandFactory.getCommand(cmd);
     }

@@ -13,15 +13,13 @@ export class InfoCommand extends AbstractCommand {
         if (message.channel.type === ChannelType.GuildText) {
             const textChannel: typeof TextChannel = message.channel;
             if (!this.isMemberInVoiceChannel(message)) {
-                return textChannel.send(
+                textChannel.send(
                     "You have to be in a voice channel to stop the music!"
                 );
+            } else {
+                textChannel.send({ embeds: [this.constructEmbedInfo()] });
             }
-            const infoMsg: EmbedBuilder = this.constructEmbedInfo();
-
-            return textChannel.send({ embeds: [infoMsg] });
-        } else {
-            return;
+            
         }
     }
 
