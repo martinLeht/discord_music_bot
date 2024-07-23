@@ -1,5 +1,5 @@
 import { ChannelType, Guild, Message, EmbedBuilder, VoiceBasedChannel } from "discord.js";
-import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } from "@discordjs/voice";
+import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, StreamType } from "@discordjs/voice";
 const { TextChannel } = require('discord.js');
 import { Command } from "../Command";
 import { AbstractCommand } from "../AbstractCommand";
@@ -196,7 +196,7 @@ export class PlayCommand extends AbstractCommand {
                         connection: connection,
                         audioPlayer: audioPlayer,
                         songs: [],
-                        volume: 5
+                        volume: 10
                     };
 
                     playlist.songs.filter(song => !!song.url).forEach(song => queueContract.songs.push(song));
@@ -241,28 +241,31 @@ export class PlayCommand extends AbstractCommand {
                 this.leaveChannel(serverQueue, queue, guild.id);
             } else {
                 try {
-                    const audioStream = await this.youtubeService.getAudioStream(song.url);
+                    const audioStream = await this.youtubeService.getAudioStreamYtdlCore(song.url);
                     if (audioStream) {
-                        const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
+                        const resource = createAudioResource(audioStream, { 
+                            inputType: StreamType.WebmOpus,
+                        });
                         if (resource) {
                             serverQueue.songs[0].playing = true;
                             serverQueue.audioPlayer.play(resource);
-                            serverQueue.audioPlayer.on('error', error => {
-                                console.error("ERROR OCCURED on audio play");
-                                console.error(error);
-                                this.leaveChannel(serverQueue, queue, guild.id);
-                            });
                             serverQueue.audioPlayer.on(AudioPlayerStatus.Playing, () => {
                                 console.log('The audio player has started playing!');
                                 console.log(serverQueue.songs.find(song => song.playing));
                             });
                             serverQueue.audioPlayer.on(AudioPlayerStatus.Idle, () => this.songFinishHandler(guild, serverQueue, queue));
+                            serverQueue.audioPlayer.on('error', error => {
+                                console.error("ERROR OCCURED on audio play");
+                                console.error(error);
+                                this.leaveChannel(serverQueue, queue, guild.id);
+                            });
     
                             serverQueue.connection.subscribe(serverQueue.audioPlayer);
     
                             serverQueue.textChannel.send(`Start playing: **${song.title}**\n ${song.url}`);
+                            console.log(resource)
                         } else {
-                            serverQueue.textChannel.send(`Got no audioo resource from YTDL API: **${song.title}**\n ${song.url}`);
+                            serverQueue.textChannel.send(`Got no audio resource from YTDL API: **${song.title}**\n ${song.url}`);
                             this.leaveChannel(serverQueue, queue, guild.id);
                         }
                     } else {
@@ -298,9 +301,11 @@ export class PlayCommand extends AbstractCommand {
                 this.leaveChannel(serverQueue, queue, guild.id);
             } else {
                 if (nextTrack.url) {
-                    const audioStream = await this.youtubeService.getAudioStream(nextTrack.url);
+                    const audioStream = await this.youtubeService.getAudioStreamYtdlCore(nextTrack.url);
                     if (audioStream) {
-                        const resource = createAudioResource(audioStream.stream, { inputType: audioStream.type });
+                        const resource = createAudioResource(audioStream, { 
+                            inputType: StreamType.WebmOpus
+                        });
                         serverQueue.audioPlayer.play(resource);
                         
                         const playlistEmbedMsg: EmbedBuilder = DiscordUtils.constructEmbedPlaylist({ name: "Current Queue", songs: serverQueue.songs });

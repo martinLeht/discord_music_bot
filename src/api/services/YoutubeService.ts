@@ -1,22 +1,12 @@
 import { injectable } from "inversify";
-import ytdl from "ytdl-core";
+import ytdl from "@distube/ytdl-core";
 import { search, stream, YouTubeStream } from 'play-dl';
 import { ISong } from "../models/ISong";
 import { IPlaylist } from "../models/IPlaylist";
+import { Readable } from "stream";
 
 @injectable()
 export class YoutubeService {
-
-    private ytdlDownloadConfig: any = {
-        filter: "audioonly",
-        opusEncoded: true,
-        encoderArgs: ['-af','dynaudnorm=f=200'],
-        bitrate: 320,
-        quality: "highestaudio",
-        liveBuffer: 40000,
-        highWaterMark: 1 << 25, 
-
-    };
 
     public async getSongBySearch(searchTerm: string): Promise<ISong | null> {
         try {
@@ -52,7 +42,24 @@ export class YoutubeService {
 
     public async getAudioStream(songUrl: string): Promise<YouTubeStream | null> {
         try {
-            return await stream(songUrl, { discordPlayerCompatibility: true });
+            return await stream(songUrl, { 
+                discordPlayerCompatibility: true                 
+            });
+        } catch (e: any) {
+            console.log(e);
+            console.log(e.message);
+        }
+        return null;
+    }
+
+    public async getAudioStreamYtdlCore(songUrl: string): Promise<Readable | null> {
+        try {
+            return ytdl(songUrl, { 
+                filter: "audioonly",
+                quality: "highestaudio",
+                liveBuffer: 40000,
+                highWaterMark: 1 << 25, 
+            })
         } catch (e: any) {
             console.log(e);
             console.log(e.message);

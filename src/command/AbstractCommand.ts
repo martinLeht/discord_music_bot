@@ -1,5 +1,4 @@
-import { Message, Permissions, PermissionsBitField } from "discord.js";
-const { TextChannel } = require('discord.js');
+import { Message, PermissionsBitField } from "discord.js";
 import { IQueue } from "./models/IQueue";
 import { Command } from "./Command";
 import { ICommand } from "./ICommand";

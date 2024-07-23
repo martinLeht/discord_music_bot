@@ -14,7 +14,6 @@ export class DiscordBot {
     private commandFactory: CommandFactory;
     private queue: Map<string, IQueue>;
     private readonly token: string = TOKEN;
-
     constructor(
         @inject(TYPES.Client) client: Client,
         @inject(TYPES.CommandFactory) commandFactory: CommandFactory
@@ -24,7 +23,7 @@ export class DiscordBot {
         this.queue = new Map();
     }
 
-    public listen() {
+    public async listen() {        
         this.client.on('messageCreate', async (message) => {
             if (message.content.startsWith('!join') && message.member?.voice.channel && message.guild) {
                 joinVoiceChannel({
@@ -53,8 +52,9 @@ export class DiscordBot {
             }
         });
 
+        
         this.client.once('ready', () => {
-            console.log('Ready!');
+            console.log(`Ready, logged in: ${this.client.user?.tag}!`);
         });
 
         this.client.once('reconnecting', () => {
@@ -69,7 +69,7 @@ export class DiscordBot {
             console.log(err);
             console.log(err.message);
         });
-
+    
         this.client.login(this.token);
     }
 
