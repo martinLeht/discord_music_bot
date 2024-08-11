@@ -20,7 +20,7 @@
     "@discord-player/extractor": "^4.4.7",
     "@discordjs/opus": "^0.9.0",
     "@discordjs/voice": "^0.17.0",
-    "@distube/ytdl-core": "^4.13.5",
+    "@distube/ytdl-core": "^4.14.4",
     "@types/node": "^20.11.9",
     "@types/spotify-web-api-node": "^5.0.11",
     "cross-env": "^7.0.3",
