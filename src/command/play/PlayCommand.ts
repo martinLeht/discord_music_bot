@@ -1,5 +1,5 @@
 import { ChannelType, Guild, Message, EmbedBuilder, VoiceBasedChannel } from "discord.js";
-import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, StreamType } from "@discordjs/voice";
+import { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, StreamType, DiscordGatewayAdapterCreator } from "@discordjs/voice";
 const { TextChannel } = require('discord.js');
 import { Command } from "../Command";
 import { AbstractCommand } from "../AbstractCommand";
@@ -129,7 +129,7 @@ export class PlayCommand extends AbstractCommand {
                 const connection = joinVoiceChannel({
                     channelId: voiceChannel.id,
                     guildId: guild.id,
-                    adapterCreator: guild.voiceAdapterCreator
+                    adapterCreator: guild.voiceAdapterCreator as DiscordGatewayAdapterCreator
                 });
                 const audioPlayer = createAudioPlayer()
 
@@ -187,7 +187,7 @@ export class PlayCommand extends AbstractCommand {
                     const connection = joinVoiceChannel({
                         channelId: voiceChannel.id,
                         guildId: guild.id,
-                        adapterCreator: guild.voiceAdapterCreator,
+                        adapterCreator: guild.voiceAdapterCreator as DiscordGatewayAdapterCreator,
                     });
                     const audioPlayer = createAudioPlayer()
                     const queueContract: IQueue = {

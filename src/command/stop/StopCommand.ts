@@ -4,7 +4,7 @@ import { IQueue } from "../models/IQueue";
 import { AbstractCommand } from "../AbstractCommand";
 import { Command } from "../Command";
 import { injectable } from "inversify";
-import { VoiceConnection, getVoiceConnection } from "@discordjs/voice";
+import { getVoiceConnection } from "@discordjs/voice";
 
 @injectable()
 export class StopCommand extends AbstractCommand {

@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { getVoiceConnection, joinVoiceChannel } from "@discordjs/voice";
+import { DiscordGatewayAdapterCreator, getVoiceConnection, joinVoiceChannel } from "@discordjs/voice";
 import { inject, injectable } from "inversify";
 import { CommandFactory } from '../command/CommandFactory';
 import { TOKEN, PREFIX } from "../config/config";
@@ -29,7 +29,7 @@ export class DiscordBot {
                 joinVoiceChannel({
                     channelId: message.member.voice.channel.id,
                     guildId: message.guild.id,
-                    adapterCreator: message.guild.voiceAdapterCreator
+                    adapterCreator: message.guild.voiceAdapterCreator as DiscordGatewayAdapterCreator
                 });
             } else {
                 if (message.content.startsWith(PREFIX) && !message.author.bot) {
